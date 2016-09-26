@@ -105,7 +105,7 @@ d3.csv("nflResults.csv", function(error, data) {
     .enter().append("path")
       .attr("class", "link")
       .attr("d", path)
-      .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+      .style("stroke-width", function(d) { return 2*Math.max(1, d.dy); })
       .sort(function(a, b) { return b.dy - a.dy; });
 
 // add the link titles
@@ -129,7 +129,7 @@ d3.csv("nflResults.csv", function(error, data) {
 
 // add the rectangles for the nodes
   node.append("rect")
-      .attr("height", function(d) { return d.dy; })
+      .attr("height", function(d) { return (d.dy); })
       .attr("width", sankey.nodeWidth())
       .style("fill", function(d) { 
 		  return d.color = color(d.name.replace(/ .*/, "")); })

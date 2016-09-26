@@ -29,18 +29,18 @@ data <- data %>%
                     ifelse(roundString == 'ConfChamp', 3 , 
                     ifelse(roundString == 'SuperBowl', 4, NA)))))
 
-test <- data
-test$roundString = ifelse(test$roundString == 'WildCard', 'Wild Card' , 
-                          ifelse(test$roundString == 'Division', 'Divisional Round' , 
-                                 ifelse(test$roundString == 'ConfChamp', 'Conference Championship' , 
-                                        ifelse(test$roundString == 'SuperBowl', 'Super Bowl', NA))))
+
+data$roundString = ifelse(data$roundString == 'WildCard', 'Wild Card' , 
+                          ifelse(data$roundString == 'Division', 'Divisional Round' , 
+                                 ifelse(data$roundString == 'ConfChamp', 'Conference Championship' , 
+                                        ifelse(data$roundString == 'SuperBowl', 'Super Bowl', NA))))
 
 dataTrim <- select(data, winner, loser, roundString, round, year)
 
 
 # New datafram for super bowl winners
 superBowlWinners <- data %>%
-                        filter(roundString == 'SuperBowl')
+                        filter(roundString == 'Super Bowl')
 
 superBowlWinners <- select(superBowlWinners, winner, loser, roundString, round, year)
 # Make round == 5 for all of these, to signify they're the champs
@@ -81,7 +81,15 @@ table <- completeResults %>%
     group_by(roundString, seed) %>%
     summarize(count = n())   
 
-# Save table
+
+# Format table so it's good to graph
 names(table) <- c('source','target','value')
+table$target = ifelse(table$target == 1, '1st seed' , 
+                          ifelse(table$target == 2, '2nd seed' , 
+                                 ifelse(table$target == 3, '3rd seed' , 
+                                        ifelse(table$target == 4, '4th seed' , 
+                                               ifelse(table$target == 5, '5th seed' , 
+                                                    ifelse(table$target == 6, '6th seed', NA))))))
+# Save table
 write.csv(table, 'nflResults.csv', row.names = F)
 
