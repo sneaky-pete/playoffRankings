@@ -21,27 +21,27 @@ require(ggplot2)
 
 # Ranking data
 
-data <- read.csv('nflPlayoffResults.csv', header = F, stringsAsFactors = F)
-names(data) <- c('roundString', 'day', 'date', 'winner','at','loser','boxscore','winningScore','losingScore','year')
+nflData <- read.csv('nflPlayoffResults.csv', header = F, stringsAsFactors = F)
+names(nflData) <- c('roundString', 'day', 'date', 'winner','at','loser','boxscore','winningScore','losingScore','year')
 
 # Translate the round of the playoffs into a numeric value (e.g. first round == 1)
-data <- data %>%
+nflData <- nflData %>%
         mutate(round = ifelse(roundString == 'WildCard', 1 , 
                     ifelse(roundString == 'Division', 2 , 
                     ifelse(roundString == 'ConfChamp', 3 , 
                     ifelse(roundString == 'SuperBowl', 4, NA)))))
 
 
-data$roundString = ifelse(data$roundString == 'WildCard', 'Wild Card' , 
-                          ifelse(data$roundString == 'Division', 'Divisional Round' , 
-                                 ifelse(data$roundString == 'ConfChamp', 'Conference Championship' , 
-                                        ifelse(data$roundString == 'SuperBowl', 'Super Bowl', NA))))
+nflData$roundString = ifelse(nflData$roundString == 'WildCard', 'Wild Card' , 
+                          ifelse(nflData$roundString == 'Division', 'Divisional Round' , 
+                                 ifelse(nflData$roundString == 'ConfChamp', 'Conference Championship' , 
+                                        ifelse(nflData$roundString == 'SuperBowl', 'Super Bowl', NA))))
 
-dataTrim <- select(data, winner, loser, roundString, round, year)
+nflDataTrim <- select(nflData, winner, loser, roundString, round, year)
 
 
 # New dataframe for super bowl winners
-superBowlWinners <- data %>%
+superBowlWinners <- nflData %>%
                         filter(roundString == 'Super Bowl')
 
 superBowlWinners <- select(superBowlWinners, winner, loser, roundString, round, year)
@@ -65,7 +65,7 @@ seed <- select(seed, seed, year, afc, nfc)
 
     
 # Merge
-playoffResults <-merge(dataTrim, seedLong, by.x = c('loser', 'year'), by.y = c('team', 'year'))
+playoffResults <-merge(nflDataTrim, seedLong, by.x = c('loser', 'year'), by.y = c('team', 'year'))
 playoffResults <- arrange(playoffResults, year, seed)
 
 superBowlResults <-merge(superBowlWinners, seedLong, by.x = c('winner', 'year'), by.y = c('team', 'year'))
@@ -79,21 +79,31 @@ completeResults <- completeResults %>%
 
 
 # Now summarize in a small table describing how often each seed LOST at that round of the playoffs (e.g. that round was the furthest they made it)
-table <- completeResults %>%
+nflSummary <- completeResults %>%
     group_by(roundString, seed) %>%
     summarize(count = n())   
 
 
-# Format table so it's good to graph
-names(table) <- c('source','target','value')
-table$target = ifelse(table$target == 1, '1st seed' , 
-                          ifelse(table$target == 2, '2nd seed' , 
-                                 ifelse(table$target == 3, '3rd seed' , 
-                                        ifelse(table$target == 4, '4th seed' , 
-                                               ifelse(table$target == 5, '5th seed' , 
-                                                    ifelse(table$target == 6, '6th seed', NA))))))
+# Recode table so the graph is descriptive
+nflSummary$seed = ifelse(nflSummary$seed == 1, '1st seed' , 
+                          ifelse(nflSummary$seed == 2, '2nd seed' , 
+                                 ifelse(nflSummary$seed == 3, '3rd seed' , 
+                                        ifelse(nflSummary$seed == 4, '4th seed' , 
+                                               ifelse(nflSummary$seed == 5, '5th seed' , 
+                                                    ifelse(nflSummary$seed == 6, '6th seed', NA))))))
+
+# Translate table to proportions (e.g. 50% of Super Bowl winners were the 1 seed, rather than 4 Super Bowl winnners were the 1 seed)
+nflSummary <- nflSummary %>%
+            group_by(roundString) %>%
+            mutate(totalGames = sum(count)) %>%
+            mutate(freq = count/totalGames) %>%
+            select(roundString, seed, freq) %>%
+            rename(source = roundString, target = seed, value = freq)
+
+
+
 # Save table
-write.csv(table, 'nflResults.csv', row.names = F)
+write.csv(nflSummary, 'nflSummary.csv', row.names = F)
 
 
 
@@ -146,18 +156,41 @@ nbaChamps$seed <- nbaChamps$winnerSeed
 nbaData <- rbind(nbaData, nbaChamps)
 
 # And lets give the rounds numerical values
-nbaData$roundNum = ifelse(nbaData$round == 'Eastern Conf First Round' | nbaData$round == 'Western Conf First Round', 1,
-                      ifelse(nbaData$round == 'Eastern Conf Semifinals' | nbaData$round == 'Western Conf Semifinals', 2, 
-                             ifelse(nbaData$round == 'Eastern Conf Finals' | nbaData$round == 'Western Conf Finals', 3, 
-                                    ifelse(nbaData$round == 'Finals', 4, 
-                                                  ifelse(nbaData$round == 'World Champs', 5, NA)))))
+nbaData$roundNum = ifelse(nbaData$round == 'Eastern Conf First Round' | nbaData$round == 'Western Conf First Round', 'First Round',
+                      ifelse(nbaData$round == 'Eastern Conf Semifinals' | nbaData$round == 'Western Conf Semifinals', 'Conference Semis', 
+                             ifelse(nbaData$round == 'Eastern Conf Finals' | nbaData$round == 'Western Conf Finals', 'Conference Finals', 
+                                    ifelse(nbaData$round == 'Finals', 'NBA Finals', 
+                                                  ifelse(nbaData$round == 'World Champs', 'World Champs', NA)))))
 
 
-# Now summarize in a small table describing how often each seed LOST at that round of the playoffs (e.g. that round was the furthest they made it)
+# Get a table summarizing results, which I'll use to make the Sankey Charts
 nbaSummary <- nbaData %>%
-    group_by(round, seed) %>%
-    summarize(count = n())       
-    
+    group_by(roundNum, seed) %>%
+    summarize(count = n())   
 
 
-View(nbaData %>% filter(round == 'World Champs'))
+# Recode table so the graph is descriptive
+nbaSummary$seed = ifelse(nbaSummary$seed == 1, '1st seed' , 
+                         ifelse(nbaSummary$seed == 2, '2nd seed' , 
+                                ifelse(nbaSummary$seed == 3, '3rd seed' , 
+                                       ifelse(nbaSummary$seed == 4, '4th seed' , 
+                                              ifelse(nbaSummary$seed == 5, '5th seed' , 
+                                                     ifelse(nbaSummary$seed == 6, '6th seed' , 
+                                                            ifelse(nbaSummary$seed == 7, '7th seed' , 
+                                                                ifelse(nbaSummary$seed == 8, '8th seed', NA))))))))
+
+
+# Translate table to proportions (e.g. 50% of world champs were the 1 seed, rather than 4 world champs were the 1 seed)
+nbaSummary <- nbaSummary %>%
+    group_by(roundNum) %>%
+    mutate(totalGames = sum(count)) %>%
+    mutate(freq = count/totalGames) %>%
+    select(roundNum, seed, freq) %>%
+    rename(source = roundNum, target = seed, value = freq)
+
+
+
+# Save table
+write.csv(nbaSummary, 'nbaSummary.csv', row.names = F)
+
+
