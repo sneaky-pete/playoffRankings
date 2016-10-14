@@ -194,3 +194,57 @@ nbaSummary <- nbaSummary %>%
 write.csv(nbaSummary, 'nbaSummary.csv', row.names = F)
 
 
+
+
+
+###############################################################################
+### MLB DATA
+###############################################################################
+
+mlbData <- read.csv('mlbPlayoffResults.csv', header = F, stringsAsFactors = F)
+
+# Clean 'er up!
+
+# Remove some of the weird headers that got pulled in while I was scraping
+mlbData <- mlbData %>%
+            mutate(headerFlag = as.numeric(str_replace_all(V1,  "[^[:alnum:]]", ""))) %>%
+            filter(is.na(headerFlag)) %>%
+            select(-headerFlag)
+
+# Put the year into its own column
+mlbData <- mlbData %>%
+            separate(V1, c('year', 'text'), "(?<=[0-9]) (?=[:alpha:])")
+
+
+# Put the round into its own column
+rounds <- c('ALDS','NLDS','ALCS','NLCS','ALWC','NLWC','World Series',"World series")
+mlbData <- mlbData %>%
+    mutate(round = str_extract(text, paste(rounds, collapse="|")))
+
+# Get the winning team, which is always the first one listed
+mlbData <- mlbData %>%
+            mutate(winner = gsub('(.*)(\\n)(.*)( vs\\.)(.*)', '\\3', text) ) %>%
+            mutate(winner = gsub('(.*)( \\()(.*)', '\\1', winner), winner) %>%
+            mutate(winner = gsub('\\*', '', winner), winner) %>%
+            mutate(loser = gsub('(.*)(\\n)(.*)( vs\\.)(.*)', '\\5', text) ) %>%
+            mutate(loser = gsub('(.*)( \\()(.*)', '\\1', loser), loser) %>%
+            mutate(loser = gsub('\\*', '', loser), loser) 
+
+
+# Dictionary
+dict <- read.csv('mlbTeamDictionary.csv', header = F)
+names(dict) <- c('short','long')
+dict$long <- trimws(dict$long)
+dict$short <- trimws(dict$short)
+
+mlbData <- mlbData %>%    
+    mutate(winnerShort = as.character(with(dict, short[match(mlbData$winner, long)]))) %>%
+    mutate(winnerShort = ifelse(is.na(winnerShort), winner, winnerShort))
+
+
+# This ain't working, even though it's the same code as the winner column!
+test <- mlbData %>%    
+    mutate(loserShort = as.character(with(dict, short[match(mlbData$loser, long)]))) %>%
+    mutate(loserShort = ifelse(is.na(loserShort), loser, loserShort))
+
+

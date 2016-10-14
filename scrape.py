@@ -110,36 +110,73 @@ with open("nflPlayoffSeeds.csv", "wb") as f:
 
 
 
-######################################################
-### Scrape basketball-reference.com for NBA playoff result data
-######################################################
 
+######################################################
+### Scrape baseball-reference.com for MLB playoff result data
+######################################################
 
 # Where the data is saved
 os.chdir('H:\playoffRankingData')
 
+rows = []
+year = '2016'
+
 # Grab the HTML
-url = 'http://www.basketball-reference.com/playoffs/series.html'
+url = 'http://www.baseball-reference.com/postseason/'
 
 # Scrape the HTML at the url
-r = requests.get(url).text
+r = requests.get(url)
+text = r.text
 
 # Turn the HTML into a Beautiful Soup object
-soup = BeautifulSoup(r, 'lxml')
+soup = BeautifulSoup(text, 'lxml')
 
 # Grab the table
-results = soup.find('table', {'id': 'playoffs_series'})	
+results = soup.find('table', {'class': 'stats_table'})	
+
+# Grab all of the table cells
+for i in xrange(0,len(results.find_all('tr'))):
+	row = results.find_all('tr')[i]
+	if str(row.find('td', {'class': 'bold_text'})) != 'None':
+		year = row.find('td', {'class': 'bold_text'}).text.encode('utf8').strip()
+	for i in xrange(0, len(row.find_all('td'))):
+		cell = row.find_all('td')[i]
+		value = cell.text.encode('utf8').strip()
+		rows.append(year + ' ' + value)	
+	
+with open('mlbPlayoffResults.csv', 'wb') as f:
+    writer = csv.writer(f)
+    for val in rows:
+        writer.writerow([val])    
+
+
+######################################################
+### Scrape Wikipedia for MLB playoff seeding data  ###
+######################################################
 
 rows = []
-for i in xrange(1,len(results.find_all('tr'))):
-	row = results.find_all('tr')[i]
-	cells = [val.text.encode('utf8') for val in row.find_all(['td','th'])]
-	rows.append(cells)
+for year in xrange(1980,2016):
 
-# Write to a CSV file
-with open("nbaPlayoffResults.csv", "wb") as f:
-    writer = csv.writer(f)
-    writer.writerows(rows)
+
+	url = 'https://en.wikipedia.org/wiki/' + str(year) + '-' + str(year+1)[2:] + '_NFL_playoffs'
+	# Scrape the HTML at the url
+	r = requests.get(url)
+	text = r.text
+	# Turn the HTML into a Beautiful Soup object
+	soup = BeautifulSoup(text, 'lxml')
+
+
+	# Find the table with seed data
+	try:
+		seedTable = soup.find('td', text='Playoff seeds').find_parent('table')
+		for i in xrange(2,len(seedTable.find_all('tr'))):
+			row = seedTable.find_all('tr')[i]
+			cells = [val.text.encode('utf8') for val in row.find_all(['td','th'])]
+			cells.append(year)
+			rows.append(cells)
+	except:
+		print year
+		continue    
 
 
 
