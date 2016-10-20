@@ -10,7 +10,7 @@ setwd('~/Home/playoffRankingData')
 require(dplyr)
 require(tidyr)
 require(ggplot2)
-# require(stringr)
+require(stringr)
 # require(scales)
 # require(chron)
 
@@ -225,10 +225,17 @@ mlbData <- mlbData %>%
 mlbData <- mlbData %>%
             mutate(winner = gsub('(.*)(\\n)(.*)( vs\\.)(.*)', '\\3', text) ) %>%
             mutate(winner = gsub('(.*)( \\()(.*)', '\\1', winner), winner) %>%
-            mutate(winner = gsub('\\*', '', winner), winner) %>%
             mutate(loser = gsub('(.*)(\\n)(.*)( vs\\.)(.*)', '\\5', text) ) %>%
             mutate(loser = gsub('(.*)( \\()(.*)', '\\1', loser), loser) %>%
-            mutate(loser = gsub('\\*', '', loser), loser) 
+            mutate(loser = trimws(loser)) %>%
+            mutate(winner = trimws(winner))
+
+# Mark Wild Card teams, for later use
+mlbData <- mlbData %>%
+            mutate(seed = ifelse(str_detect(mlbData$loser, '\\*'), 'Wild Card', '')) %>%
+            # But now get rid of the apostrophe, so that the team names are clean
+            mutate(loser = gsub('\\*', '', loser), loser) %>%
+            mutate(winner = gsub('\\*', '', winner), winner)
 
 
 # Dictionary
@@ -237,14 +244,51 @@ names(dict) <- c('short','long')
 dict$long <- trimws(dict$long)
 dict$short <- trimws(dict$short)
 
+
+# Use the above dictionary to transalte all teams into three-letter codes
 mlbData <- mlbData %>%    
     mutate(winnerShort = as.character(with(dict, short[match(mlbData$winner, long)]))) %>%
-    mutate(winnerShort = ifelse(is.na(winnerShort), winner, winnerShort))
-
-
-# This ain't working, even though it's the same code as the winner column!
-test <- mlbData %>%    
+    mutate(winnerShort = ifelse(is.na(winnerShort), winner, winnerShort)) %>%
     mutate(loserShort = as.character(with(dict, short[match(mlbData$loser, long)]))) %>%
     mutate(loserShort = ifelse(is.na(loserShort), loser, loserShort))
+
+# Filter to only 1980 and beyond, and drop 1994 where there were no playoffs
+mlbData <- mlbData %>% 
+            filter(year > 1979) %>%
+            filter(year != 1994)
+
+# And now keep just the columns we're interested in
+mlbData <- mlbData %>%
+            select(year, round, winnerShort, loserShort, seed)
+                
+
+# Now for MLB Seeding
+mlbSeedData <- read.csv('mlbPlayoffSeeds.csv', header = F, stringsAsFactors = F)
+
+# Convert names to 3-lettered initials
+mlbSeedData <- mlbSeedData %>%    
+                mutate(team = as.character(with(dict, short[match(mlbSeedData$V1, long)])))
+
+# Rename the columns
+mlbSeedData <- mlbSeedData %>%
+                rename(teamLong = V1, wins = V2, losses = V3, winPct = V4, gamesBack = V5, homeRecord = V6, awayRecord = V7, year = V8)
+
+    
+# So maybe we want to merge first -- that way we can separate out AL and Nl
+# Then we say, for any team with AL in the series title, sort by number of wins and enumerate them
+# Merge with the loser, because we want to know info for the the last round the team made it to
+mlbCombinedData <- merge(mlbSeedData, mlbData, by.x = c('team','year'), by.y = c('loserShort','year'))
+
+# Extract seed from teams where the seed is provided in this data
+mlbSeedData$seed <- str_extract(mlbSeedData$V1, '\\d')
+
+
+# Create seed for all the teams
+test <- mlbSeedData %>%
+    group_by(V8) %>%
+    arrange(-V2) %>%
+    mutate(seed = ifelse(is.na(seed), 1:n(), seed))
+
+
 
 

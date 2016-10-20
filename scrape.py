@@ -157,21 +157,18 @@ with open('mlbPlayoffResults.csv', 'wb') as f:
 rows = []
 for year in xrange(1980,2016):
 
-
-	url = 'https://en.wikipedia.org/wiki/' + str(year) + '-' + str(year+1)[2:] + '_NFL_playoffs'
+	url = 'https://en.wikipedia.org/wiki/' + str(year) +'_Major_League_Baseball_season'
 	# Scrape the HTML at the url
 	r = requests.get(url)
 	text = r.text
 	# Turn the HTML into a Beautiful Soup object
 	soup = BeautifulSoup(text, 'lxml')
 
-
-	# Find the table with seed data
-	try:
-		seedTable = soup.find('td', text='Playoff seeds').find_parent('table')
-		for i in xrange(2,len(seedTable.find_all('tr'))):
-			row = seedTable.find_all('tr')[i]
-			cells = [val.text.encode('utf8') for val in row.find_all(['td','th'])]
+	# Find all rows with a yellow background, which are the playoff teams on the Wikipedia page
+	playoffTeams = soup.findAll('tr', style = "background:#CCFFCC")
+	try:	
+		for i in xrange(0,len(playoffTeams)):
+			cells = [val.text.encode('utf8') for val in playoffTeams[i].find_all(['td'])]
 			cells.append(year)
 			rows.append(cells)
 	except:
@@ -179,5 +176,7 @@ for year in xrange(1980,2016):
 		continue    
 
 
-
-
+# Write to a CSV file
+with open("mlbPlayoffSeeds.csv", "wb") as f:
+	writer = csv.writer(f)
+	writer.writerows(rows)
