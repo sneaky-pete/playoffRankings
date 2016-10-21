@@ -243,6 +243,9 @@ dict <- read.csv('mlbTeamDictionary.csv', header = F)
 names(dict) <- c('short','long')
 dict$long <- trimws(dict$long)
 dict$short <- trimws(dict$short)
+# Merge in leagues to each one of the teams
+leagues <- read.csv('mlbTeamLeagues.csv')
+dict <- merge(dict, leagues, by.x = 'short', by.y = 'Tm', all = T)
 
 
 # Use the above dictionary to transalte all teams into three-letter codes
@@ -250,16 +253,18 @@ mlbData <- mlbData %>%
     mutate(winnerShort = as.character(with(dict, short[match(mlbData$winner, long)]))) %>%
     mutate(winnerShort = ifelse(is.na(winnerShort), winner, winnerShort)) %>%
     mutate(loserShort = as.character(with(dict, short[match(mlbData$loser, long)]))) %>%
-    mutate(loserShort = ifelse(is.na(loserShort), loser, loserShort))
+    mutate(loserShort = ifelse(is.na(loserShort), loser, loserShort)) %>%
+    mutate(league = as.character(with(dict, league[match(loserShort, short)])))
 
 # Filter to only 1980 and beyond, and drop 1994 where there were no playoffs
 mlbData <- mlbData %>% 
             filter(year > 1979) %>%
             filter(year != 1994)
 
-# And now keep just the columns we're interested in
+# And now keep just the columns we're interested in, and rename
 mlbData <- mlbData %>%
-            select(year, round, winnerShort, loserShort, seed)
+            select(year, round, winnerShort, loserShort, seed, league) %>%
+            rename(winner = winnerShort, loser = loserShort)
                 
 
 # Now for MLB Seeding
@@ -277,7 +282,8 @@ mlbSeedData <- mlbSeedData %>%
 # So maybe we want to merge first -- that way we can separate out AL and Nl
 # Then we say, for any team with AL in the series title, sort by number of wins and enumerate them
 # Merge with the loser, because we want to know info for the the last round the team made it to
-mlbCombinedData <- merge(mlbSeedData, mlbData, by.x = c('team','year'), by.y = c('loserShort','year'))
+# We want to merge onto 
+mlbCombinedData <- merge(mlbSeedData, mlbData, by.x = c('team','year'), by.y = c('loser','year'))
 
 # Extract seed from teams where the seed is provided in this data
 mlbSeedData$seed <- str_extract(mlbSeedData$V1, '\\d')
