@@ -166,6 +166,8 @@ for year in xrange(1980,2016):
 
 	# Find all rows with a yellow background, which are the playoff teams on the Wikipedia page
 	playoffTeams = soup.findAll('tr', style = "background:#CCFFCC")
+	# Sometimes the yellow-background teams are coded using 'bgcolor' instead of 'background'
+	playoffTeams.extend(soup.findAll('tr', bgcolor = "#CCFFCC"))
 	try:	
 		for i in xrange(0,len(playoffTeams)):
 			cells = [val.text.encode('utf8') for val in playoffTeams[i].find_all(['td'])]

@@ -247,54 +247,117 @@ dict$short <- trimws(dict$short)
 leagues <- read.csv('mlbTeamLeagues.csv')
 dict <- merge(dict, leagues, by.x = 'short', by.y = 'Tm', all = T)
 
-
 # Use the above dictionary to transalte all teams into three-letter codes
 mlbData <- mlbData %>%    
     mutate(winnerShort = as.character(with(dict, short[match(mlbData$winner, long)]))) %>%
     mutate(winnerShort = ifelse(is.na(winnerShort), winner, winnerShort)) %>%
+    mutate(winnerShort = ifelse(winnerShort == 'WSN', 'WSH', ifelse(winnerShort == 'LAA', 'ANA', winnerShort))) %>%
     mutate(loserShort = as.character(with(dict, short[match(mlbData$loser, long)]))) %>%
     mutate(loserShort = ifelse(is.na(loserShort), loser, loserShort)) %>%
-    mutate(league = as.character(with(dict, league[match(loserShort, short)])))
+    mutate(loserShort = ifelse(loserShort == 'WSN', 'WSH', ifelse(loserShort == 'LAA', 'ANA', loserShort))) %>%
+    mutate(league = as.character(with(dict, league[match(loserShort, short)]))) 
 
-# Filter to only 1980 and beyond, and drop 1994 where there were no playoffs
+
+# Filter to only 1980 and beyond, and drop 1994 where there were no playoffs, and 2016 cause WS ain't complete
 mlbData <- mlbData %>% 
             filter(year > 1979) %>%
-            filter(year != 1994)
+            filter(year != 1994) %>%
+            filter(year != 2016)
 
 # And now keep just the columns we're interested in, and rename
 mlbData <- mlbData %>%
             select(year, round, winnerShort, loserShort, seed, league) %>%
             rename(winner = winnerShort, loser = loserShort)
                 
+# Add one more 'round' where it's just world series winners
+mlbChamps <- mlbData %>%
+                filter(round == 'World Series') %>%
+                mutate(round = 'World Champs', loser = winner, seed = '', league = '') %>%
+                # The Marlins won the WS as a WC, two things I'm dealing with manually. So I eed to hard-code this in, too
+                mutate(seed = ifelse(loser == 'FLA', 'Wild Card', ''))
+mlbChamps$league <- as.character(with(dict, league[match(mlbChamps$loser, short)]))
+
+# Append the WS champs onto the rest of the mlbData
+mlbData <- rbind(mlbData, mlbChamps)
+
 
 # Now for MLB Seeding
 mlbSeedData <- read.csv('mlbPlayoffSeeds.csv', header = F, stringsAsFactors = F)
 
-# Convert names to 3-lettered initials
-mlbSeedData <- mlbSeedData %>%    
-                mutate(team = as.character(with(dict, short[match(mlbSeedData$V1, long)])))
 
 # Rename the columns
 mlbSeedData <- mlbSeedData %>%
-                rename(teamLong = V1, wins = V2, losses = V3, winPct = V4, gamesBack = V5, homeRecord = V6, awayRecord = V7, year = V8)
+    rename(teamLong = V1, wins = V2, losses = V3, winPct = V4, gamesBack = V5, homeRecord = V6, awayRecord = V7, year = V8)
 
-    
+# Extract seed from teams where the seed is provided in this data
+mlbSeedData$seed <- str_extract(mlbSeedData$teamLong, '\\d')
+
+
+# Convert names to 3-lettered initials
+mlbSeedData <- mlbSeedData %>%    
+                # Won't match to the dictionary if the team name is something like "(2) Texas Rangers"
+                mutate(teamStripped = gsub('\\([0-9]\\) ', '', mlbSeedData$teamLong)) %>%
+                mutate(team = as.character(with(dict, short[match(teamStripped, long)]))) %>%
+                select(-teamStripped)
+
+# Wikipedia is weird for 2010 season -- missed the Phillies and the Braves. Manually insert these.
+mlbSeedData <- mlbSeedData %>%
+            rbind(c('(1) Philadelphia Phillies',97,65,0.599,'—','54–30','43–35', 2010, 1, 'PHI')) %>%
+            rbind(c('(4) Atlanta Braves',91,71,0.562,6,'56–25','35–46', 2010, 4, 'ATL'))
+
+
 # So maybe we want to merge first -- that way we can separate out AL and Nl
 # Then we say, for any team with AL in the series title, sort by number of wins and enumerate them
 # Merge with the loser, because we want to know info for the the last round the team made it to
 # We want to merge onto 
-mlbCombinedData <- merge(mlbSeedData, mlbData, by.x = c('team','year'), by.y = c('loser','year'))
+mlbCombinedData <- merge(mlbSeedData, mlbData, by.x = c('team','year'), by.y = c('loser','year'), all = T)
 
-# Extract seed from teams where the seed is provided in this data
-mlbSeedData$seed <- str_extract(mlbSeedData$V1, '\\d')
+# One more weird thing -- the Astros and the Brewers switched divisions at different points
+mlbCombinedData <- mlbCombinedData %>%
+    mutate(league = ifelse(as.integer(year) < 1998 & team == 'MIL', 'AL', league)) %>%
+    mutate(league = ifelse(as.integer(year) < 2013 & team == 'HOU', 'NL', league))
 
 
 # Create seed for all the teams
-test <- mlbSeedData %>%
-    group_by(V8) %>%
-    arrange(-V2) %>%
-    mutate(seed = ifelse(is.na(seed), 1:n(), seed))
 
+    # For everybody with a seed already, get that down on paper
+    mlbCombinedData <- mlbCombinedData %>%
+                    mutate(seed = seed.y) %>%
+                    mutate(seed = ifelse(!is.na(seed.x), seed.x, seed)) %>%
+                    # For 95-97, the WC was the 4 seed
+                    mutate(seed = ifelse(seed == 'Wild Card', 4, seed))
+
+    # Now, for teams without a seed, calculate 'seeds' retrospectively using number of wins
+    natLeagueUnseeded <- mlbCombinedData %>%
+        filter(league == 'NL', seed == '') %>%
+        group_by(year) %>%
+        mutate(wins = as.integer(wins)) %>%
+        arrange(-as.integer(wins)) %>%
+        mutate(seed = 1:n())
+    natLeagueSeeded <- mlbCombinedData %>%
+        filter(league == 'NL', seed != '')
+    natLeague <- rbind(natLeagueSeeded,natLeagueUnseeded)
+
+    amLeagueUnseeded <- mlbCombinedData %>%
+        filter(league == 'AL', seed == '') %>%
+        group_by(year) %>%
+        mutate(wins = as.integer(wins)) %>%
+        arrange(-as.integer(wins)) %>%
+        mutate(seed = 1:n())
+    amLeagueSeeded <- mlbCombinedData %>%
+        filter(league == 'NL', seed != '')
+    amLeague <- rbind(amLeagueSeeded,amLeagueUnseeded)    
+    
+    # Get rid of unneeded data
+    rm(amLeagueSeeded, amLeagueUnseeded, natLeagueSeeded,natLeagueUnseeded)
+
+# Get your final dataset!!
+mlbComplete <- rbind(amLeague, natLeague)
+
+mlbComplete <- mlbComplete %>%
+                select(-seed.x, -seed.y)
+         
+# To do: Reorganize a bit... 
 
 
 
