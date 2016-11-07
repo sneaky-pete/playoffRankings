@@ -107,6 +107,36 @@ with open("nflPlayoffSeeds.csv", "wb") as f:
 
 
 
+######################################################
+### Scrape basketball-reference.com for NBA playoff result data
+######################################################
+
+
+# Where the data is saved
+os.chdir('H:\playoffRankingData')
+
+# Grab the HTML
+url = 'http://www.basketball-reference.com/playoffs/series.html'
+
+# Scrape the HTML at the url
+r = requests.get(url).text
+
+# Turn the HTML into a Beautiful Soup object
+soup = BeautifulSoup(r, 'lxml')
+
+# Grab the table
+results = soup.find('table', {'id': 'playoffs_series'})	
+
+rows = []
+for i in xrange(1,len(results.find_all('tr'))):
+	row = results.find_all('tr')[i]
+	cells = [val.text.encode('utf8') for val in row.find_all(['td','th'])]
+	rows.append(cells)
+
+# Write to a CSV file
+with open("test.csv", "wb") as f:
+    writer = csv.writer(f)
+    writer.writerows(rows)
 
 
 

@@ -155,7 +155,7 @@ nbaChamps$seed <- nbaChamps$winnerSeed
 # Now append the champs data set to the original data
 nbaData <- rbind(nbaData, nbaChamps)
 
-# And lets give the rounds numerical values
+# And lets give the rounds the same values (regardless of conference)
 nbaData$roundNum = ifelse(nbaData$round == 'Eastern Conf First Round' | nbaData$round == 'Western Conf First Round', 'First Round',
                       ifelse(nbaData$round == 'Eastern Conf Semifinals' | nbaData$round == 'Western Conf Semifinals', 'Conference Semis', 
                              ifelse(nbaData$round == 'Eastern Conf Finals' | nbaData$round == 'Western Conf Finals', 'Conference Finals', 
@@ -345,19 +345,83 @@ mlbCombinedData <- mlbCombinedData %>%
         arrange(-as.integer(wins)) %>%
         mutate(seed = 1:n())
     amLeagueSeeded <- mlbCombinedData %>%
-        filter(league == 'NL', seed != '')
+        filter(league == 'AL', seed != '')
     amLeague <- rbind(amLeagueSeeded,amLeagueUnseeded)    
     
     # Get rid of unneeded data
     rm(amLeagueSeeded, amLeagueUnseeded, natLeagueSeeded,natLeagueUnseeded)
 
+    
 # Get your final dataset!!
 mlbComplete <- rbind(amLeague, natLeague)
 
+
+
+# And lets give the rounds the same values (regardless of league)
+mlbComplete$roundGeneral = ifelse(mlbComplete$round == 'ALWC' | mlbComplete$round == 'NLWC', 'Wild Card',
+                          ifelse(mlbComplete$round == 'ALDS' | mlbComplete$round == 'NLDS', 'Divisional Series', 
+                                 ifelse(mlbComplete$round == 'ALCS' | mlbComplete$round == 'NLCS', 'League Championship', 
+                                        ifelse(mlbComplete$round == 'World Series', 'World Series', 
+                                               ifelse(mlbComplete$round == 'World Champs', 'World Champs', NA)))))
+# Drop unneeded columns
 mlbComplete <- mlbComplete %>%
                 select(-seed.x, -seed.y)
+
+
+# MLB can't make up its mind about playoff formats, so we have to break it into different 'eras'
+mlbTwoSeeds <- mlbComplete %>%
+                    filter(year < 1995 & year != 1981)
+
+mlbFourSeeds <- mlbComplete %>%
+                    filter((year < 2012 & year > 1993)  | year == 1981)
+
+mlbFiveSeeds <- mlbComplete %>%
+                    filter(year > 2011)
          
-# To do: Reorganize a bit... 
+
+# Now create a summary table for each of the different playoff formats
+mlbSummaryTwoSeeds <- mlbTwoSeeds %>%
+    group_by(roundGeneral, seed) %>%
+    summarize(count = n()) %>%
+    # Only examine up until the wild card was introduced. WC introduced in 2012, adding a few more seeds
+    group_by(roundGeneral) %>%
+    mutate(totalGames = sum(count)) %>%
+    mutate(freq = count/totalGames) %>%
+    select(roundGeneral, seed, freq) %>%
+    rename(source = roundGeneral, target = seed, value = freq)
+
+# Now create a summary table for each of the different playoff formats
+mlbSummaryFourSeeds <- mlbFourSeeds %>%
+    group_by(roundGeneral, seed) %>%
+    summarize(count = n()) %>%
+    # Only examine up until the wild card was introduced. WC introduced in 2012, adding a few more seeds
+    group_by(roundGeneral) %>%
+    mutate(totalGames = sum(count)) %>%
+    mutate(freq = count/totalGames) %>%
+    select(roundGeneral, seed, freq) %>%
+    rename(source = roundGeneral, target = seed, value = freq)
+
+# Now create a summary table for each of the different playoff formats
+mlbSummaryFiveSeeds <- mlbFiveSeeds %>%
+    group_by(roundGeneral, seed) %>%
+    summarize(count = n()) %>%
+    # Only examine up until the wild card was introduced. WC introduced in 2012, adding a few more seeds
+    group_by(roundGeneral) %>%
+    mutate(totalGames = sum(count)) %>%
+    mutate(freq = count/totalGames) %>%
+    select(roundGeneral, seed, freq) %>%
+    rename(source = roundGeneral, target = seed, value = freq)
+
+write.csv(mlbSummaryTwoSeeds, 'mlbSummaryTwoSeeds.csv', row.names = F)
+write.csv(mlbSummaryFourSeeds, 'mlbSummaryFourSeeds.csv', row.names = F)
+write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
 
 
 
+
+
+
+
+###############################################################################
+### NHL DATA
+###############################################################################            
