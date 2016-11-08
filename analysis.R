@@ -426,3 +426,28 @@ write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
 ### NHL DATA
 ###############################################################################            
 
+nhlData <- read.csv('nhlPlayoffResults.csv', header = F, stringsAsFactors = F)
+
+# Get rid of weird separator rows that got scraped
+# And rename columns, while you're at it
+nhlData <- nhlData %>%
+                rename(round = V1, winLoss = V2, teams = V3, blank = V4, junk = V5, year = V6) %>%
+                filter(teams != '') %>%
+                select(-junk, -blank) %>%
+                separate(teams, c('winner', 'loser'), sep = ' over ')
+
+
+
+nhlSeed <- read.csv('nhlPlayoffSeeds.csv', header = F, stringsAsFactors = F)
+
+# Cleaning
+nhlSeed <- nhlSeed %>%
+            rename(team = V1, year = V2, seed = V3, conf = V4) %>%
+            # First column comes with a lot of info besides just the team name, all after a comma. Extract team from this
+            separate(team, c('team','junk'), sep = ',') %>%
+            select(-junk) %>%
+            # Sometimes the separator is a hyphen-looking thing (CAREFUL! THAT'S NOT A HYPHEN IS A SPEC. CHAR)
+            separate(team, c('team','junk'), sep = ' – ') %>%
+            select(-junk)
+    
+
