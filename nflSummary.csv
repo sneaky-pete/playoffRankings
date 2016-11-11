@@ -1,28 +1,28 @@
-"source","target","value"
-"Conference Championship","1st seed",0.2
-"Conference Championship","2nd seed",0.471428571428571
-"Conference Championship","3rd seed",0.114285714285714
-"Conference Championship","4th seed",0.0714285714285714
-"Conference Championship","5th seed",0.1
-"Conference Championship","6th seed",0.0428571428571429
-"Divisional Round","1st seed",0.121428571428571
-"Divisional Round","2nd seed",0.15
-"Divisional Round","3rd seed",0.271428571428571
-"Divisional Round","4th seed",0.214285714285714
-"Divisional Round","5th seed",0.128571428571429
-"Divisional Round","6th seed",0.114285714285714
-"Super Bowl","1st seed",0.6
-"Super Bowl","2nd seed",0.257142857142857
-"Super Bowl","3rd seed",0.0285714285714286
-"Super Bowl","4th seed",0.0857142857142857
-"Super Bowl","5th seed",0.0285714285714286
-"Wild Card","3rd seed",0.172131147540984
-"Wild Card","4th seed",0.221311475409836
-"Wild Card","5th seed",0.352459016393443
-"Wild Card","6th seed",0.254098360655738
-"World Champion","1st seed",0.514285714285714
-"World Champion","2nd seed",0.2
-"World Champion","3rd seed",0.0571428571428571
-"World Champion","4th seed",0.142857142857143
-"World Champion","5th seed",0.0285714285714286
-"World Champion","6th seed",0.0571428571428571
+"source","target","value","category"
+"World Champion","1st seed",0.514285714285714,"World Champion"
+"World Champion","2nd seed",0.2,"World Champion"
+"World Champion","3rd seed",0.0571428571428571,"World Champion"
+"World Champion","4th seed",0.142857142857143,"World Champion"
+"World Champion","5th seed",0.0285714285714286,"World Champion"
+"World Champion","6th seed",0.0571428571428571,"World Champion"
+"Super Bowl","1st seed",0.6,"Super Bowl"
+"Super Bowl","2nd seed",0.257142857142857,"Super Bowl"
+"Super Bowl","3rd seed",0.0285714285714286,"Super Bowl"
+"Super Bowl","4th seed",0.0857142857142857,"Super Bowl"
+"Super Bowl","5th seed",0.0285714285714286,"Super Bowl"
+"Conference Championship","1st seed",0.2,"Conference Championship"
+"Conference Championship","2nd seed",0.471428571428571,"Conference Championship"
+"Conference Championship","3rd seed",0.114285714285714,"Conference Championship"
+"Conference Championship","4th seed",0.0714285714285714,"Conference Championship"
+"Conference Championship","5th seed",0.1,"Conference Championship"
+"Conference Championship","6th seed",0.0428571428571429,"Conference Championship"
+"Divisional Round","1st seed",0.121428571428571,"Divisional Round"
+"Divisional Round","2nd seed",0.15,"Divisional Round"
+"Divisional Round","3rd seed",0.271428571428571,"Divisional Round"
+"Divisional Round","4th seed",0.214285714285714,"Divisional Round"
+"Divisional Round","5th seed",0.128571428571429,"Divisional Round"
+"Divisional Round","6th seed",0.114285714285714,"Divisional Round"
+"Wild Card","3rd seed",0.172131147540984,"Wild Card"
+"Wild Card","4th seed",0.221311475409836,"Wild Card"
+"Wild Card","5th seed",0.352459016393443,"Wild Card"
+"Wild Card","6th seed",0.254098360655738,"Wild Card"

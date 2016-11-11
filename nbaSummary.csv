@@ -1,4 +1,14 @@
 "source","target","value"
+"World Champs","1st seed",0.702702702702703
+"World Champs","2nd seed",0.162162162162162
+"World Champs","3rd seed",0.108108108108108
+"World Champs","6th seed",0.027027027027027
+"NBA Finals","1st seed",0.432432432432432
+"NBA Finals","2nd seed",0.324324324324324
+"NBA Finals","3rd seed",0.135135135135135
+"NBA Finals","4th seed",0.0540540540540541
+"NBA Finals","6th seed",0.027027027027027
+"NBA Finals","8th seed",0.027027027027027
 "Conference Finals","1st seed",0.283783783783784
 "Conference Finals","2nd seed",0.27027027027027
 "Conference Finals","3rd seed",0.297297297297297
@@ -22,13 +32,3 @@
 "First Round","6th seed",0.196428571428571
 "First Round","7th seed",0.217857142857143
 "First Round","8th seed",0.217857142857143
-"NBA Finals","1st seed",0.432432432432432
-"NBA Finals","2nd seed",0.324324324324324
-"NBA Finals","3rd seed",0.135135135135135
-"NBA Finals","4th seed",0.0540540540540541
-"NBA Finals","6th seed",0.027027027027027
-"NBA Finals","8th seed",0.027027027027027
-"World Champs","1st seed",0.702702702702703
-"World Champs","2nd seed",0.162162162162162
-"World Champs","3rd seed",0.108108108108108
-"World Champs","6th seed",0.027027027027027

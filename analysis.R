@@ -22,32 +22,23 @@ require(stringr)
 # Ranking data
 
 nflData <- read.csv('nflPlayoffResults.csv', header = F, stringsAsFactors = F)
-names(nflData) <- c('roundString', 'day', 'date', 'winner','at','loser','boxscore','winningScore','losingScore','year')
 
-# Translate the round of the playoffs into a numeric value (e.g. first round == 1)
 nflData <- nflData %>%
-        mutate(round = ifelse(roundString == 'WildCard', 1 , 
-                    ifelse(roundString == 'Division', 2 , 
-                    ifelse(roundString == 'ConfChamp', 3 , 
-                    ifelse(roundString == 'SuperBowl', 4, NA)))))
+        rename(round = V1, day = V2, date = V3, winner = V4, at = V5, loser = V6, boxscore = V7, winningScore = V8, losingScore = V9, year = V10) %>%
+        select(winner, loser, round, year)
 
-
-nflData$roundString = ifelse(nflData$roundString == 'WildCard', 'Wild Card' , 
-                          ifelse(nflData$roundString == 'Division', 'Divisional Round' , 
-                                 ifelse(nflData$roundString == 'ConfChamp', 'Conference Championship' , 
-                                        ifelse(nflData$roundString == 'SuperBowl', 'Super Bowl', NA))))
-
-nflDataTrim <- select(nflData, winner, loser, roundString, round, year)
-
+# Fix some of the formatting for the rounds
+nflData$round = ifelse(nflData$round == 'WildCard', 'Wild Card' , 
+                          ifelse(nflData$round == 'Division', 'Divisional Round' , 
+                                 ifelse(nflData$round == 'ConfChamp', 'Conference Championship' , 
+                                        ifelse(nflData$round == 'SuperBowl', 'Super Bowl', NA))))
 
 # New dataframe for super bowl winners
 superBowlWinners <- nflData %>%
-                        filter(roundString == 'Super Bowl')
+                        filter(round == 'Super Bowl') %>%
+                        select(winner, loser, round, year)
 
-superBowlWinners <- select(superBowlWinners, winner, loser, roundString, round, year)
-# Make round == 5 for all of these, to signify they're the champs
-superBowlWinners$round <- 5
-superBowlWinners$roundString <- 'World Champion'
+superBowlWinners$round <- 'World Champion'
 
 # Clean seed data
 
@@ -59,10 +50,45 @@ seed$nfc <- str_replace(seed$teamNfc, ' \\(.*\\)', '')
 
 seed <- select(seed, seed, year, afc, nfc)
 
-    # Get this data set on the team-year level
-    seedLong <- gather(seed, seed, year)
-    names(seedLong) <- c('seed','year','division','team')
+# Get this data set on the team-year level
+seedLong <- gather(seed, seed, year)
+names(seedLong) <- c('seed','year','division','team')
 
+##########################################################################################    
+##########################################################################################    
+# Testing all this stuff. Cause the wins should be cumulative
+nflWinners <- nflDataTrim %>% 
+                    select(-loser) %>%
+                    rename(team = winner)
+
+nflLosers <- nflDataTrim %>% 
+                select(-winner) %>%
+                rename(team = loser)
+
+nflLong <- rbind(nflWinners, nflLosers)
+
+nflPlayoffs <- merge(nflLong, seedLong, by = c('team', 'year')) %>%
+                    arrange(year, seed)
+
+nflSuperBowl <- superBowlResults %>%
+                    select(-loser) %>%
+                    rename(team = winner)
+
+nflDataComplete <- rbind(nflPlayoffs, nflSuperBowl) %>%
+    filter(year != 1982)
+
+nflSummary <- nflDataComplete %>%
+    group_by(round, seed) %>%
+    summarize(count = n())  %>%
+    group_by(round) %>%
+    mutate(totalGames = sum(count)) %>%
+    mutate(freq = count/totalGames) %>%
+    select(round, seed, freq) %>%
+    rename(source = round, target = seed, value = freq)
+
+write.csv(nflSummary, 'nflSummary2.csv', row.names = F)
+##########################################################################################    
+##########################################################################################        
     
 # Merge
 playoffResults <-merge(nflDataTrim, seedLong, by.x = c('loser', 'year'), by.y = c('team', 'year'))
@@ -80,7 +106,7 @@ completeResults <- completeResults %>%
 
 # Now summarize in a small table describing how often each seed LOST at that round of the playoffs (e.g. that round was the furthest they made it)
 nflSummary <- completeResults %>%
-    group_by(roundString, seed) %>%
+    group_by(round, seed) %>%
     summarize(count = n())   
 
 
@@ -94,13 +120,21 @@ nflSummary$seed = ifelse(nflSummary$seed == 1, '1st seed' ,
 
 # Translate table to proportions (e.g. 50% of Super Bowl winners were the 1 seed, rather than 4 Super Bowl winnners were the 1 seed)
 nflSummary <- nflSummary %>%
-            group_by(roundString) %>%
+            group_by(round) %>%
             mutate(totalGames = sum(count)) %>%
             mutate(freq = count/totalGames) %>%
-            select(roundString, seed, freq) %>%
-            rename(source = roundString, target = seed, value = freq)
+            select(round, seed, freq) %>%
+            rename(source = round, target = seed, value = freq)
 
 
+# Create a vector with playoff rounds in the desired order (need to be ordered properly for d3 sankey graphing later)
+playoffOrder <- c("World Champion", "Super Bowl", "Conference Championship", "Divisional Round", "Wild Card")
+
+nflSummary <- nflSummary %>%
+    ungroup() %>%
+    mutate(category =  factor(source, levels = playoffOrder)) %>%
+    arrange(category, target) %>%
+    select(-category)
 
 # Save table
 write.csv(nflSummary, 'nflSummary.csv', row.names = F)
@@ -188,6 +222,14 @@ nbaSummary <- nbaSummary %>%
     select(roundNum, seed, freq) %>%
     rename(source = roundNum, target = seed, value = freq)
 
+# Create a vector with playoff rounds in the desired order (need to be ordered properly for d3 sankey graphing later)
+playoffOrder <- c("World Champs", "NBA Finals", "Conference Finals", "Conference Semis", "First Round")
+
+nbaSummary <- nbaSummary %>%
+    ungroup() %>%
+    mutate(category =  factor(source, levels = playoffOrder)) %>%
+    arrange(category, target) %>%
+    select(-category)
 
 
 # Save table
@@ -379,6 +421,9 @@ mlbFiveSeeds <- mlbComplete %>%
                     filter(year > 2011)
          
 
+
+# Create a vector with playoff rounds in the desired order (need to be ordered properly for d3 sankey graphing later)
+playoffOrder<- c("World Champs", "World Series", "League Championship")
 # Now create a summary table for each of the different playoff formats
 mlbSummaryTwoSeeds <- mlbTwoSeeds %>%
     group_by(roundGeneral, seed) %>%
@@ -388,8 +433,15 @@ mlbSummaryTwoSeeds <- mlbTwoSeeds %>%
     mutate(totalGames = sum(count)) %>%
     mutate(freq = count/totalGames) %>%
     select(roundGeneral, seed, freq) %>%
-    rename(source = roundGeneral, target = seed, value = freq)
+    rename(source = roundGeneral, target = seed, value = freq) %>%
+    ungroup() %>%
+    mutate(category =  factor(source, levels = playoffOrder)) %>%
+    arrange(category, target) %>%
+    select(-category)
 
+
+# Create a vector with playoff rounds in the desired order (need to be ordered properly for d3 sankey graphing later)
+playoffOrder<- c("World Champs", "World Series", "League Championship", "Divisional Series")
 # Now create a summary table for each of the different playoff formats
 mlbSummaryFourSeeds <- mlbFourSeeds %>%
     group_by(roundGeneral, seed) %>%
@@ -399,8 +451,14 @@ mlbSummaryFourSeeds <- mlbFourSeeds %>%
     mutate(totalGames = sum(count)) %>%
     mutate(freq = count/totalGames) %>%
     select(roundGeneral, seed, freq) %>%
-    rename(source = roundGeneral, target = seed, value = freq)
+    rename(source = roundGeneral, target = seed, value = freq)%>%
+    ungroup() %>%
+    mutate(category =  factor(source, levels = playoffOrder)) %>%
+    arrange(category, target) %>%
+    select(-category)
 
+# Create a vector with playoff rounds in the desired order (need to be ordered properly for d3 sankey graphing later)
+playoffOrder<- c("World Champs", "World Series", "League Championship", "Divisional Series", "Wild Card")
 # Now create a summary table for each of the different playoff formats
 mlbSummaryFiveSeeds <- mlbFiveSeeds %>%
     group_by(roundGeneral, seed) %>%
@@ -410,12 +468,16 @@ mlbSummaryFiveSeeds <- mlbFiveSeeds %>%
     mutate(totalGames = sum(count)) %>%
     mutate(freq = count/totalGames) %>%
     select(roundGeneral, seed, freq) %>%
-    rename(source = roundGeneral, target = seed, value = freq)
+    rename(source = roundGeneral, target = seed, value = freq) %>%
+    ungroup() %>%
+    mutate(category =  factor(source, levels = playoffOrder)) %>%
+    arrange(category, target) %>%
+    select(-category)
+
 
 write.csv(mlbSummaryTwoSeeds, 'mlbSummaryTwoSeeds.csv', row.names = F)
 write.csv(mlbSummaryFourSeeds, 'mlbSummaryFourSeeds.csv', row.names = F)
 write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
-
 
 
 
@@ -449,5 +511,35 @@ nhlSeed <- nhlSeed %>%
             # Sometimes the separator is a hyphen-looking thing (CAREFUL! THAT'S NOT A HYPHEN IS A SPEC. CHAR)
             separate(team, c('team','junk'), sep = ' – ') %>%
             select(-junk)
-    
+
+
+# Make separate frame for World Champions
+nhlChampions <- nhlData %>%
+    filter(round == 'Stanley Cup Final') %>%
+    mutate(round = 'World Champs')
+
+nhlChampions <- merge(nhlChampions, nhlSeed, by.x = c('winner', 'year'), by.y = c('team', 'year'))
+
+# Merge
+nhlCompleteData <- merge(nhlData, nhlSeed, by.x = c('loser', 'year'), by.y = c('team', 'year'))
+nhlCompleteData <- rbind(nhlCompleteData, nhlChampions)
+
+
+# Create a vector with playoff rounds in the desired order (need to be ordered properly for d3 sankey graphing later)
+playoffOrder<- c("World Champs", "Stanley Cup Final", "Conference Finals", "Conference Semi-Finals", "Conference Quarter-Finals")
+# Create a summary table
+nhlSummary <- nhlCompleteData %>%
+    group_by(round, seed) %>%
+    summarize(count = n()) %>%
+    group_by(round) %>%
+    mutate(totalGames = sum(count)) %>%
+    mutate(freq = count/totalGames) %>%
+    select(round, seed, freq) %>%
+    rename(source = round, target = seed, value = freq) %>%
+    ungroup() %>%
+    mutate(category =  factor(source, levels = playoffOrder)) %>%
+    arrange(category, target) %>%
+    select(-category)
+
+write.csv(nhlSummary, 'nhlSummary.csv', row.names = F)
 
