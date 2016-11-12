@@ -1,34 +1,43 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<link rel="stylesheet" type="text/css" href="style.css">
-<title>Playoff Seedings -- When do they matter most?</title>
+<head>
+	<meta charset="utf-8">
+	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+	<link href="https://fonts.googleapis.com/css?family=Abhaya+Libre|Lato:300" rel="stylesheet">
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="js/sankey.js"></script>
+	<!-- <script src="js/bootstrap.js"></script> -->
+	<!-- <script src="js/sankeyCharts.js"></script> -->
+	<title>Playoff Seedings -- When do they matter most?</title>
+</head>
 
 <body>
-
-<h1>For which sports do playoff seedings matter the most?</h1>
-<p>In some sports, it seems like the highest-ranked teams always win to the championship. In others, it seems like anything could happen. So I was curious to see -- in which sports are playoff seedings most predictive of the eventual champion?</p>
-<p>I scraped playoff and seed data for the four major sports: football, basketball, baseball, and hockey, going back to 1980. For a first look, I generated a few Sankey charts to show how far the different seeds make it in each sport.</p>
-
-
-<p>We could do a couple of things. Regression. See with data viz. And look at different measures of predictiveness -- so not just the champion but also the last place. In other words, in which sport is it the biggest disadvantage to be last. Another metric would be in which sport are there the most upsets? And in which sport are there the biggest upsets? </p>
-
-<p id="nflchart"></p>
-
-<p>And here's some stuff for the NBA</p>
-<p id="nbachart"></p>
+<div>
+	<h1 class = 'title'>For which sports do playoff seedings matter?</h1>
+	<p class = 'author'>Musings, by Pete Hlawitschka</p>
+	<p>In some sports, it seems like the highest-ranked teams always win to the championship. In others, it seems like anything could happen. So I was curious to see -- in which sports are playoff seedings most predictive of the eventual champion?</p>
+	<p>I scraped playoff and seed data for the four major sports: football, basketball, baseball, and hockey, going back to 1980. For a first look, I generated a few Sankey charts to show how far the different seeds make it in each sport. </p>
 
 
-<p>And now for some MLB stuff</p>
-<p id="mlb4chart"></p>
+	<p>We could do a couple of things. Regression. See with data viz. And look at different measures of predictiveness -- so not just the champion but also the last place. In other words, in which sport is it the biggest disadvantage to be last. Another metric would be in which sport are there the most upsets? And in which sport are there the biggest upsets? </p>
+
+	<p id="nflchart"></p>
+
+	<p>And here's some stuff for the NBA</p>
+	<p id="nbachart"></p>
 
 
-<p>And now for some NHL stuff</p>
-<p id="nhlchart"></p>
+	<p>And now for some MLB stuff</p>
+	<p id="mlb4chart"></p>
 
 
+	<p>And now for some NHL stuff</p>
+	<p id="nhlchart"></p>
+</div>
 
-<script src="http://d3js.org/d3.v3.min.js"></script>
-<script src="sankey.js"></script>
+</body>
+
+
 
 
 <!-- :::::::::::::::::::::::::::::::::::::: -->
@@ -38,7 +47,7 @@
 <script>
 	
 	var margin = {top: 10, right: 10, bottom: 10, left: 10},
-		width = 400 - margin.left - margin.right,
+		width = 700 - margin.left - margin.right,
 		height = 400 - margin.top - margin.bottom;
 
 	// text display on hover
@@ -569,6 +578,72 @@
 
 
 
+<!-- 
 
-</body>
+<style>
+
+.chart rect {
+  fill: steelblue;
+}
+
+.chart text {
+  fill: brown;
+  font: 10px sans-serif;
+  text-anchor: middle;
+}
+
+.bar:hover {
+  fill: brown;
+}
+
+</style>
+<svg class="chart"></svg>
+<p>That's it, folks!></p>
+<script>
+
+var width = 200,
+    height = 200;
+
+var y = d3.scale.linear()
+    .range([height, 0]);
+
+var chart = d3.select(".chart")
+    .attr("width", width)
+    .attr("height", height);
+
+d3.csv("nflBar.csv", type, function(error, data) {
+  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+
+  var barWidth = width / data.length;
+
+  var bar = chart.selectAll("g")
+      .data(data)
+    .enter().append("g")
+      .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
+
+  bar.append("rect")
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return height - y(d.value); })
+      .attr("width", barWidth - 1)
+      .attr("class", "bar")	;
+
+  bar.append("text")
+      .attr("x", barWidth / 2)
+      .attr("y", height)
+      .attr("dy", "-.25em")
+      .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; });
+});
+
+function type(d) {
+  d.value = +d.value; // coerce to number
+  return d;
+}
+
+</script>
+
+ -->
+
+
+
+
 </html>

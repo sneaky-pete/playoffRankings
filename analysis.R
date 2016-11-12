@@ -11,7 +11,8 @@ require(dplyr)
 require(tidyr)
 require(ggplot2)
 require(stringr)
-# require(scales)
+require(scales)
+install.packages("extrafont");library(extrafont)
 # require(chron)
 
 
@@ -520,3 +521,24 @@ write.csv(nhlSummary, 'nhlSummary.csv', row.names = F)
 
 
 
+
+
+
+
+################################################################################
+################################################################################
+### Chart creation
+################################################################################
+################################################################################
+
+nflBar <- nflSummary %>% 
+			filter(source == 'World Champs')
+
+ggplot(data=nflBar, aes(x=target, y=value)) +
+	geom_bar(stat="identity") +
+	ggtitle("Probably of winning the 'ship, by seed") +
+	scale_y_continuous(labels=percent) +
+	theme(text=element_text(family="Avenir"))
+
+
+font_import("Trebuchet MS")

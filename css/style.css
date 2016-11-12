@@ -1,0 +1,51 @@
+
+*{
+    font-family: 'Abhaya Libre', serif;
+
+}
+
+body{
+    font-family: 'Abhaya Libre', serif;
+    margin: 0 auto;
+    max-width: 700px;
+}
+
+.title{
+  padding-top: 20px;
+}
+
+.author{
+  font-family: 'Lato', sans-serif;
+  font-weight: 100;
+  text-align: center;
+  padding-bottom: 50px;
+  padding-top: 20px;
+}
+
+
+/*Sankey stuff*/
+
+.node rect {
+  cursor: move;
+  fill-opacity: .9;
+  shape-rendering: crispEdges;
+}
+
+.node text {
+  pointer-events: none;
+  text-shadow: 0 1px 0 #fff;
+}
+
+.link {
+  fill: none;
+  stroke: #000;
+  stroke-opacity: .2;
+}
+
+.link:hover {
+  stroke-opacity: .5;
+}
+
+.test {
+	/*fill: blue !important*/
+}
