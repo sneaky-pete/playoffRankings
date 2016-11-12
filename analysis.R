@@ -170,7 +170,7 @@ write.csv(nflSummary, 'nflSummary.csv', row.names = F)
         rename(source = round, target = seed, value = freq)  
     
     # Recode table so the graph is descriptive
-    nbaSummary$target = ifelse(nbaSummary$target == 1, '1st seed' , 
+    nbaSummary$target = ifelse(nbaSummary$target == 1, '1st seed' ,
                              ifelse(nbaSummary$target == 2, '2nd seed' , 
                                     ifelse(nbaSummary$target == 3, '3rd seed' , 
                                            ifelse(nbaSummary$target == 4, '4th seed' , 
@@ -188,8 +188,23 @@ write.csv(nflSummary, 'nflSummary.csv', row.names = F)
         arrange(category, target) %>%
         select(-category)
 
+    
+# Because of a weird quirk in the D3 Sankey graphs, manually fill in some of the (empty) seed-game pairings
+head(nbaSummary, 15)    
+four <- c('World Champs','4th seed',0)
+five <- c('World Champs','5th seed',0)
+seven <- c('World Champs','7th seed',0)	
+eight <- c('World Champs','8th seed',0)	
+nbaSummarySankey <- rbind(nbaSummary, four, five, seven, eight)
+nbaSummarySankey <- nbaSummarySankey %>%
+	ungroup() %>%
+	mutate(category =  factor(source, levels = playoffOrder)) %>%
+	arrange(category, target) %>%
+	select(-category)    
+
 # Save table
 write.csv(nbaSummary, 'nbaSummary.csv', row.names = F)
+write.csv(nbaSummarySankey, 'nbaSummarySankey.csv', row.names = F)
 
 
 
@@ -441,7 +456,7 @@ write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
 ### NHL DATA
 ###############################################################################            
 
-### NFL Playoff result data
+### NHL Playoff result data
 
     nhlData <- read.csv('nhlPlayoffResults.csv', header = F, stringsAsFactors = F)
     
