@@ -149,7 +149,6 @@ with open("test.csv", "wb") as f:
 os.chdir('H:\playoffRankingData')
 
 rows = []
-year = '2016'
 
 # Grab the HTML
 url = 'http://www.baseball-reference.com/postseason/'
@@ -185,7 +184,7 @@ with open('mlbPlayoffResults.csv', 'wb') as f:
 ######################################################
 
 rows = []
-for year in xrange(1980,2016):
+for year in xrange(1980,2017):
 
 	url = 'https://en.wikipedia.org/wiki/' + str(year) +'_Major_League_Baseball_season'
 	# Scrape the HTML at the url
