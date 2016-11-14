@@ -468,11 +468,21 @@ write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
                     filter(teams != '') %>%
                     select(-junk, -blank) %>%
                     separate(teams, c('winner', 'loser'), sep = ' over ')
-
+    
+    nhlWinners<- nhlData %>%
+                    select(winner, year, round) %>%
+                    rename(team = winner)
+    
+    nhlLosers<- nhlData %>%
+        select(loser, year, round) %>%
+        rename(team = loser)
+    
     # Make separate frame for World Champions
     nhlChampions <- nhlData %>%
         filter(round == 'Stanley Cup Final') %>%
-        mutate(round = 'World Champs')
+        mutate(round = 'World Champs') %>%
+        select(winner, year, round) %>%
+        rename(team = winner)
     
     
 ### NHL Seed data
@@ -490,14 +500,13 @@ write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
                 select(-junk)
     
 
-### NFL final, merged data sets
+### NHL final, merged data sets
 
-    # Merge champions data
-    nhlChampions <- merge(nhlChampions, nhlSeed, by.x = c('winner', 'year'), by.y = c('team', 'year'))
-    # Merge the rest
-    nhlCompleteData <- merge(nhlData, nhlSeed, by.x = c('loser', 'year'), by.y = c('team', 'year'))
-    # Throw champions and the rest together
-    nhlCompleteData <- rbind(nhlCompleteData, nhlChampions)
+    # Append the three data sets
+    nhlData <- rbind(nhlWinners, nhlLosers, nhlChampions)
+    # Merge in seed info
+    nhlCompleteData <- merge(nhlData, nhlSeed, by = c('team', 'year'))
+    
     
     # Create a vector with playoff rounds in the desired order (need to be ordered properly for d3 sankey graphing later)
     playoffOrder<- c("World Champs", "Stanley Cup Final", "Conference Finals", "Conference Semi-Finals", "Conference Quarter-Finals")
@@ -542,3 +551,8 @@ ggplot(data=nflBar, aes(x=target, y=value)) +
 
 
 font_import("Trebuchet MS")
+
+
+
+test <- (nhlCompleteData%>% filter(round == 'Conference Quarter-Finals') %>% group_by(year, seed) %>% summarize(n = n()))
+View(nhlCompleteData%>% filter(round == 'Conference Quarter-Finals'))

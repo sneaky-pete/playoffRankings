@@ -3,11 +3,9 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
-	<link href="https://fonts.googleapis.com/css?family=Abhaya+Libre|Lato:300" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Abhaya+Libre|Lato:300,700" rel="stylesheet">
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<script src="js/sankey.js"></script>
-	<!-- <script src="js/bootstrap.js"></script> -->
-	<!-- <script src="js/sankeyCharts.js"></script> -->
 	<title>Playoff Seedings -- When do they matter most?</title>
 </head>
 
@@ -15,9 +13,9 @@
 <div>
 	<h1 class = 'title'>For which sports do playoff seedings matter?</h1>
 	<p class = 'author'>Musings, by Pete Hlawitschka</p>
-	<p>Against all odds, the Cubs finally won, the Warriors blew a 3-1 lead, and the 15-1 Panthers lost in the Super Bowl. But is this as unlikely as it first seems? In all of these cases, the winning team was a 1-seed, the top ranked team on their side of the bracket (the Stanley Cup champion Penguins were a 2-seed).</p>
+	<p>This year, against all odds, the Cubs won the title, the Warriors blew a 3-1 lead, and the 15-1 Panthers lost in the Super Bowl. But should we be surprised? In all of these cases, the winning team was a 1-seed, the top ranked team on their side of the bracket, so why is everybody so surprised? (The Stanley Cup champion Penguins were a 2-seed).</p>
 
-	 <p>In some sports, it seems like the highest-ranked teams always win to the championship. In others, it seems like anything could happen. So I was curious to see -- in which sports are playoff seedings most predictive of the eventual champion?</p>
+	 <p>In some sports, it seems like the highest-ranked teams always make it to the championship. In others, it seems like anything could happen. So I was curious to see -- in which sports are playoff seedings most predictive of the eventual champion?</p>
 	
 	<p>I scraped playoff and seed data for the four major sports: football, basketball, baseball, and hockey, going back to 1980. For a first look, I generated a few Sankey charts to show how far the different seeds make it in each sport. </p>
 
@@ -30,18 +28,15 @@
 
 	<p>We could do a couple of things. Regression. See with data viz. And look at different measures of predictiveness -- so not just the champion but also the last place. In other words, in which sport is it the biggest disadvantage to be last. Another metric would be in which sport are there the most upsets? And in which sport are there the biggest upsets? </p>
 
-	<p id="nflchart"></p>
+	<div class = 'row' style = 'text-align: center'>
+		<div class = 'sankey' >NFL<p class = 'chart' id="nflchart"></p></div>
+		<div class = 'sankey' >NBA<p class = 'chart'  id="nbachart"></p></div>
+	</div>
+	<div class = 'row' style = 'text-align: center'>
+		<div class = 'sankey' >MLB<p class = 'chart'  id="mlb4chart"></p></div>
+		<div class = 'sankey' >NHL<p class = 'chart'  id="nhlchart"></p></div>
+	</div>
 
-	<p>And here's some stuff for the NBA</p>
-	<p id="nbachart"></p>
-
-
-	<p>And now for some MLB stuff</p>
-	<p id="mlb4chart"></p>
-
-
-	<p>And now for some NHL stuff</p>
-	<p id="nhlchart"></p>
 </div>
 
 </body>
@@ -56,7 +51,7 @@
 <script>
 	
 	var margin = {top: 10, right: 10, bottom: 10, left: 10},
-		width = 700 - margin.left - margin.right,
+		width = 400 - margin.left - margin.right,
 		height = 400 - margin.top - margin.bottom;
 
 	// text display on hover
@@ -190,7 +185,7 @@
 	<script>
 
 	var margin = {top: 10, right: 10, bottom: 10, left: 10},
-		width = 700 - margin.left - margin.right,
+		width = 400 - margin.left - margin.right,
 		height = 400 - margin.top - margin.bottom;
 
 	// text display on hover
@@ -324,7 +319,7 @@
 <script>
 
 	var margin = {top: 10, right: 10, bottom: 10, left: 10},
-		width = 700 - margin.left - margin.right,
+		width = 400 - margin.left - margin.right,
 		height = 400 - margin.top - margin.bottom;
 
 	// text display on hover
@@ -458,12 +453,12 @@
 <script>
 
 	var margin = {top: 10, right: 10, bottom: 10, left: 10},
-		width = 700 - margin.left - margin.right,
+		width = 400 - margin.left - margin.right,
 		height = 400 - margin.top - margin.bottom;
 
 	// text display on hover
 	var formatNumber = d3.format(",.2f"),    // two decimal places
-		format = function(d) { return 100*formatNumber(d) + "% of the time"; },
+		format = function(d) { return Math.round(100*formatNumber(d)) + "% of the time"; },
 		color = d3.scale.category20();
 
 	// append the svg canvas to the page
@@ -555,6 +550,8 @@
 		  .style("stroke", function(d) { 
 			  return d3.rgb(d.color).darker(2); })
 		.append("title")
+		.attr("fill", function(d) { return color(d.division); });
+
 		  .text(function(d) { 
 			  return d.name; });
 
