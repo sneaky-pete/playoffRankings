@@ -6,6 +6,7 @@
 	<link href="https://fonts.googleapis.com/css?family=Abhaya+Libre|Lato:300,700" rel="stylesheet">
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<script src="js/sankey.js"></script>
+	<link rel="icon" type="image/png" href="../images/favicon.png">
 	<title>Playoff Seedings -- When do they matter most?</title>
 </head>
 
@@ -36,6 +37,7 @@
 		<div class = 'sankey' >MLB<p class = 'chart'  id="mlb4chart"></p></div>
 		<div class = 'sankey' >NHL<p class = 'chart'  id="nhlchart"></p></div>
 	</div>
+
 
 </div>
 
@@ -550,8 +552,6 @@
 		  .style("stroke", function(d) { 
 			  return d3.rgb(d.color).darker(2); })
 		.append("title")
-		.attr("fill", function(d) { return color(d.division); });
-
 		  .text(function(d) { 
 			  return d.name; });
 
@@ -584,45 +584,18 @@
 
 
 
-<!-- 
-
-Still figuring out how I want to display the bar charts.
-
-<style>
-
-.chart rect {
-  fill: steelblue;
-}
-
-.chart text {
-  fill: brown;
-  font: 10px sans-serif;
-  text-anchor: middle;
-}
-
-.bar:hover {
-  fill: brown;
-}
-
-</style>
-<svg class="chart"></svg>
-<p>That's it, folks!></p>
+<svg class="nflBar"></svg>
+<p>That's it, folks!</p>
 <script>
 
-var width = 200,
-    height = 200;
 
 var y = d3.scale.linear()
-    .range([height, 0]);
 
-var chart = d3.select(".chart")
-    .attr("width", width)
-    .attr("height", height);
+var chart = d3.select(".nflBar")
 
 d3.csv("nflBar.csv", type, function(error, data) {
   y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
-  var barWidth = width / data.length;
 
   var bar = chart.selectAll("g")
       .data(data)
@@ -631,13 +604,11 @@ d3.csv("nflBar.csv", type, function(error, data) {
 
   bar.append("rect")
       .attr("y", function(d) { return y(d.value); })
-      .attr("height", function(d) { return height - y(d.value); })
       .attr("width", barWidth - 1)
-      .attr("class", "bar")	;
+      .attr("class", "bar") ;
 
   bar.append("text")
       .attr("x", barWidth / 2)
-      .attr("y", height)
       .attr("dy", "-.25em")
       .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; });
 });
@@ -649,7 +620,8 @@ function type(d) {
 
 </script>
 
- -->
+
+
 
 
 

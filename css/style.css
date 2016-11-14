@@ -67,6 +67,18 @@ body{
   stroke-opacity: .5;
 }
 
-.test {
-	/*fill: blue !important*/
+
+
+/*Bar chart stuff*/
+.bar{
+  fill: steelblue;
 }
+
+.bar text{
+  fill: brown;
+  font: 10px sans-serif;
+  text-an	chor: middle;
+}
+
+.bar:hover {
+  fill: brown;
