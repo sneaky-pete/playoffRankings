@@ -588,14 +588,20 @@
 <p>That's it, folks!</p>
 <script>
 
+var nflBarWidth = 200,
+    nlfBarHeight = 200;
 
 var y = d3.scale.linear()
+    .range([nlfBarHeight, 0]);
 
 var chart = d3.select(".nflBar")
+    .attr("width", nflBarWidth)
+    .attr("height", nlfBarHeight);
 
 d3.csv("nflBar.csv", type, function(error, data) {
   y.domain([0, d3.max(data, function(d) { return d.value; })]);
 
+  var barWidth = nflBarWidth / data.length;
 
   var bar = chart.selectAll("g")
       .data(data)
@@ -604,11 +610,13 @@ d3.csv("nflBar.csv", type, function(error, data) {
 
   bar.append("rect")
       .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return nlfBarHeight - y(d.value); })
       .attr("width", barWidth - 1)
       .attr("class", "bar") ;
 
   bar.append("text")
       .attr("x", barWidth / 2)
+      .attr("y", nlfBarHeight)
       .attr("dy", "-.25em")
       .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; });
 });
