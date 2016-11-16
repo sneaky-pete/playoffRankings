@@ -12,7 +12,6 @@ require(tidyr)
 require(ggplot2)
 require(stringr)
 require(scales)
-install.packages("extrafont");library(extrafont)
 # require(chron)
 
 
@@ -104,7 +103,7 @@ install.packages("extrafont");library(extrafont)
         arrange(category, target) %>%
         select(-category)
 
-write.csv(nflSummary, 'nflSummary.csv', row.names = F)
+write.csv(nflSummary, '../git/playoffRankings/sports/nflSummary.csv', row.names = F)
 
 
 
@@ -204,8 +203,8 @@ nbaSummarySankey <- nbaSummarySankey %>%
 	select(-category)    
 
 # Save table
-write.csv(nbaSummary, 'nbaSummary.csv', row.names = F)
-write.csv(nbaSummarySankey, 'nbaSummarySankey.csv', row.names = F)
+write.csv(nbaSummary, '../git/playoffRankings/sports/nbaSummary.csv', row.names = F)
+write.csv(nbaSummarySankey, '../git/playoffRankings/sports/nbaSummarySankey.csv', row.names = F)
 
 
 
@@ -474,9 +473,9 @@ write.csv(nbaSummarySankey, 'nbaSummarySankey.csv', row.names = F)
                                                                   ifelse(target == 7, '7th seed' , 
                                                                          ifelse(target == 8, '8th seed' , NA)))))))))
 
-write.csv(mlbSummaryTwoSeeds, 'mlbSummaryTwoSeeds.csv', row.names = F)
-write.csv(mlbSummaryFourSeeds, 'mlbSummaryFourSeeds.csv', row.names = F)
-write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
+write.csv(mlbSummaryTwoSeeds, '../git/playoffRankings/sports/mlbSummaryTwoSeeds.csv', row.names = F)
+write.csv(mlbSummaryFourSeeds, '../git/playoffRankings/sports/mlbSummaryFourSeeds.csv', row.names = F)
+write.csv(mlbSummaryFiveSeeds, '../git/playoffRankings/sports/mlbSummaryFiveSeeds.csv', row.names = F)
 
 
 
@@ -574,8 +573,8 @@ write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
         select(-category)    
     
 # Save
-write.csv(nhlSummary, 'nhlSummary.csv', row.names = F)
-write.csv(nhlSummarySankey, 'nhlSummarySankey.csv', row.names = F)
+write.csv(nhlSummary, '../git/playoffRankings/sports/nhlSummary.csv', row.names = F)
+write.csv(nhlSummarySankey, '../git/playoffRankings/sports/nhlSummarySankey.csv', row.names = F)
 
 
 
@@ -597,11 +596,17 @@ nflWinners <- nflSummary %>%
 
 nbaWinners <- nbaSummary %>%
     filter(source == "World Champs") %>%
-    mutate(source = "NBA")
+    mutate(source = "NBA") %>%
+    rbind(c('NBA', '4th seed', 0), c('NBA', '5th seed', 0)) %>%
+    arrange(target) %>%
+    mutate(value = as.numeric(value))
 
 mlbWinnersFour <- mlbSummaryFourSeeds %>%
     filter(source == "World Champs") %>%
-    mutate(source = "MLB")
+    mutate(source = "MLB") %>%
+    rbind(c('MLB', '5th seed', 0), c('MLB', '6th seed', 0)) %>%
+    arrange(target) %>%
+    mutate(value = as.numeric(value))
 
 nhlWinners <- nhlSummary %>%
     filter(source == "World Champs") %>%
@@ -619,11 +624,8 @@ allSportChampsWide[is.na(allSportChampsWide)] <- 0
 
 
 # Save
-write.csv(allSportChampsWide, 'allSportsBar.csv', row.names = F)
-write.csv(nflWinners, 'nflBar.csv', row.names = F)
-write.csv(nbaWinners, 'nbaBar.csv', row.names = F)
-write.csv(mlbWinnersFour, 'mlbFourBar.csv', row.names = F)
-write.csv(nhlWinners, 'nhlBar.csv', row.names = F)
-
-
-
+write.csv(allSportChampsWide, '../git/playoffRankings/sports/allSportsBar.csv', row.names = F)
+write.csv(nflWinners, '../git/playoffRankings/sports/nflBar.csv', row.names = F)
+write.csv(nbaWinners, '../git/playoffRankings/sports/nbaBar.csv', row.names = F)
+write.csv(mlbWinnersFour, '../git/playoffRankings/sports/mlbFourBar.csv', row.names = F)
+write.csv(nhlWinners, '../git/playoffRankings/sports/nhlBar.csv', row.names = F)
