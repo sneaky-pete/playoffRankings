@@ -78,11 +78,29 @@ body{
 	font-weight: 400;
 }
 
+#nflchart .sankeyNode{
+	stroke: #0a78c2;
+	fill: #0a78c2;
+}
 
+#nbachart .sankeyNode{
+	stroke: #2473a8;
+	fill: #2473a8;
+}
+
+#mlb4chart .sankeyNode{
+	stroke: #476c85;
+	fill: #476c85;
+}
+
+#nhlchart .sankeyNode{
+	stroke: #666666;
+	fill: #666666;
+}
 
 /*Bar chart stuff*/
 .bar{
-  fill: #0a78c2;
+  
 }
 
 .barText {

@@ -55,7 +55,7 @@
 
 
 <!-- :::::::::::::::::::::::::::::::::::::: -->
-<!-- NFL DATA -->
+<!-- Sankey charts -->
 <!-- :::::::::::::::::::::::::::::::::::::: -->
 
 <script>
@@ -64,13 +64,15 @@
 		width = 400 - margin.left - margin.right,
 		height = 400 - margin.top - margin.bottom;
 
+function sankify(chart, dataset){
+
 	// text display on hover
 	var formatNumber = d3.format(",.2f"),    // two decimal places
 		format = function(d) { return 100*formatNumber(d) + "% of the time"; },
 		color = d3.scale.category10().range(["#3648c7", "#b4baea", "#828ddc", "#505fce", "#1d31c0", "#051bba", "#03106f", "#010837"]);
 
 	// append the svg canvas to the page
-	var svgNfl = d3.select("#nflchart").append("svg")
+	var svg = d3.select("#"+ chart).append("svg")
 		.attr("width", width + margin.left + margin.right)
 		.attr("height", height + margin.top + margin.bottom)
 	  .append("g")
@@ -80,13 +82,13 @@
 	// Set the sankey diagram properties
 	var sankey = d3.sankey()
 		.nodeWidth(36)
-		.nodePadding(40)
+		.nodePadding(20)
 		.size([width, height]);
 
 	var path = sankey.link();
 
 	// load the data (using the timelyportfolio csv method)
-	d3.csv("nflSummary.csv", function(error, data) {
+	d3.csv(dataset, function(error, data) {
 
 	  //set up graph in same style as original example but empty
 	  graph = {"nodes" : [], "links" : []};
@@ -122,12 +124,12 @@
 		.layout(32);
 
 	// add in the links
-	  var link = svgNfl.append("g").selectAll(".link")
+	  var link = svg.append("g").selectAll(".link")
 		  .data(graph.links)
 		.enter().append("path")
 		  .attr("class", "link")
 		  .attr("d", path)
-		  .style("stroke-width", function(d) { return Math.max(1, d.dy); })
+		  .style("stroke-width", function(d) { return Math.max(.1, d.dy); })
 		  .sort(function(a, b) { return b.dy - a.dy; });
 
 	// add the link titles
@@ -137,7 +139,7 @@
 					d.target.name + "\n" + format(d.value); });
 
 	// add in the nodes
-	  var node = svgNfl.append("g").selectAll(".node")
+	  var node = svg.append("g").selectAll(".node")
 		  .data(graph.nodes)
 		.enter().append("g")
 		  .attr("class", "node")
@@ -153,8 +155,7 @@
 	  node.append("rect")
 		  .attr("height", function(d) { return (d.dy); })
 		  .attr("width", sankey.nodeWidth())
-		  .style("fill", '#0a78c2')
-		  .style("stroke", '#0a78c2')
+		  .attr('class','sankeyNode')
 		.append("title")
 		  .text(function(d) { 
 			  return d.name; });
@@ -182,532 +183,142 @@
 		link.attr("d", path);
 	  }
 	});
-
-</script>
-
-
-
-<!-- :::::::::::::::::::::::::::::::::::::: -->
-<!-- NBA graph -->
-<!-- :::::::::::::::::::::::::::::::::::::: -->
-
-	<script>
-
-	var margin = {top: 10, right: 10, bottom: 10, left: 10},
-		width = 400 - margin.left - margin.right,
-		height = 400 - margin.top - margin.bottom;
-
-	// text display on hover
-	var formatNumber = d3.format(",.2f"),    // two decimal places
-		format = function(d) { return 100*formatNumber(d) + "% of the time"; },
-		color = d3.scale.category20();
-
-	// append the svg canvas to the page
-	var svgNba = d3.select("#nbachart").append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
-	  .append("g")
-		.attr("transform", 
-			  "translate(" + margin.left + "," + margin.top + ")");
-
-	// Set the sankey diagram properties
-	var sankey = d3.sankey()
-		.nodeWidth(36)
-		.nodePadding(20)
-		.size([width, height]);
-
-	var path = sankey.link();
-
-	// load the data (using the timelyportfolio csv method)
-	d3.csv("nbaSummarySankey.csv", function(error, data) {
-
-	  //set up graph in same style as original example but empty
-	  graph = {"nodes" : [], "links" : []};
-
-		data.forEach(function (d) {
-		  graph.nodes.push({ "name": d.source });
-		  graph.nodes.push({ "name": d.target });
-		  graph.links.push({ "source": d.source,
-							 "target": d.target,
-							 "value": +d.value });
-		 });
-
-		 // return only the distinct / unique nodes
-		 graph.nodes = d3.keys(d3.nest()
-		   .key(function (d) { return d.name; })
-		   .map(graph.nodes));
-
-		 // loop through each link replacing the text with its index from node
-		 graph.links.forEach(function (d, i) {
-		   graph.links[i].source = graph.nodes.indexOf(graph.links[i].source);
-		   graph.links[i].target = graph.nodes.indexOf(graph.links[i].target);
-		 });
-
-		 //now loop through each nodes to make nodes an array of objects
-		 // rather than an array of strings
-		 graph.nodes.forEach(function (d, i) {
-		   graph.nodes[i] = { "name": d };
-		 });
-
-	  sankey
-		.nodes(graph.nodes)
-		.links(graph.links)
-		.layout(32);
-
-	// add in the links
-	  var link = svgNba.append("g").selectAll(".link")
-		  .data(graph.links)
-		.enter().append("path")
-		  .attr("class", "link")
-		  .attr("d", path)
-		  .style("stroke-width", function(d) { return Math.max(.01, d.dy); })
-		  .style("opacity", function(d) { return d.dy; })
-		  .sort(function(a, b) { return b.dy - a.dy; });
-
-	// add the link titles
-	  link.append("title")
-			.text(function(d) {
-				return d.source.name + " → " + 
-					d.target.name + "\n" + format(d.value); });
-
-	// add in the nodes
-	  var node = svgNba.append("g").selectAll(".node")
-		  .data(graph.nodes)
-		.enter().append("g")
-		  .attr("class", "node")
-		  .attr("transform", function(d) { 
-			  return "translate(" + d.x + "," + d.y + ")"; })
-		.call(d3.behavior.drag()
-		  .origin(function(d) { return d; })
-		  .on("dragstart", function() { 
-			  this.parentNode.appendChild(this); })
-		  .on("drag", dragmove));
-
-	// add the rectangles for the nodes
-	  node.append("rect")
-		  .attr("height", function(d) { return (d.dy); })
-		  .attr("width", sankey.nodeWidth())
-		  .style("fill", '#2473a8')
-		  .style("stroke", '#2473a8')
-		.append("title")
-		  .text(function(d) { 
-			  return d.name; });
-
-	// add in the title for the nodes
-	  node.append("text")
-		  .attr('class', 'sankeyLabel')
-		  .attr("x", -6)
-		  .attr("y", function(d) { return d.dy / 2; })
-		  .attr("dy", ".35em")
-		  .attr("text-anchor", "end")
-		  .attr("transform", null)
-		  .text(function(d) { return d.name; })
-		.filter(function(d) { return d.x < width / 2; })
-		  .attr("x", 6 + sankey.nodeWidth())
-		  .attr("text-anchor", "start");
-
-	// the function for moving the nodes
-	  function dragmove(d) {
-		d3.select(this).attr("transform", 
-			"translate(" + d.x + "," + (
-					d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))
-				) + ")");
-		sankey.relayout();
-		link.attr("d", path);
-	  }
-	});
-
-</script>
-
-
-
-<!-- :::::::::::::::::::::::::::::::::::::: -->
-<!-- MLB graph: 4 teams -->
-<!-- :::::::::::::::::::::::::::::::::::::: -->
-<script>
-
-	var margin = {top: 10, right: 10, bottom: 10, left: 10},
-		width = 400 - margin.left - margin.right,
-		height = 400 - margin.top - margin.bottom;
-
-	// text display on hover
-	var formatNumber = d3.format(",.2f"),    // two decimal places
-		format = function(d) { return 100*formatNumber(d) + "% of the time"; },
-		color = d3.scale.category20();
-
-	// append the svg canvas to the page
-	var svgMlb4 = d3.select("#mlb4chart").append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
-	  .append("g")
-		.attr("transform", 
-			  "translate(" + margin.left + "," + margin.top + ")");
-
-	// Set the sankey diagram properties
-	var sankey = d3.sankey()
-		.nodeWidth(36)
-		.nodePadding(20)
-		.size([width, height]);
-
-	var path = sankey.link();
-
-	// load the data (using the timelyportfolio csv method)
-	d3.csv("mlbSummaryFourSeeds.csv", function(error, data) {
-
-	  //set up graph in same style as original example but empty
-	  graph = {"nodes" : [], "links" : []};
-
-		data.forEach(function (d) {
-		  graph.nodes.push({ "name": d.source });
-		  graph.nodes.push({ "name": d.target });
-		  graph.links.push({ "source": d.source,
-							 "target": d.target,
-							 "value": +d.value });
-		 });
-
-		 // return only the distinct / unique nodes
-		 graph.nodes = d3.keys(d3.nest()
-		   .key(function (d) { return d.name; })
-		   .map(graph.nodes));
-
-		 // loop through each link replacing the text with its index from node
-		 graph.links.forEach(function (d, i) {
-		   graph.links[i].source = graph.nodes.indexOf(graph.links[i].source);
-		   graph.links[i].target = graph.nodes.indexOf(graph.links[i].target);
-		 });
-
-		 //now loop through each nodes to make nodes an array of objects
-		 // rather than an array of strings
-		 graph.nodes.forEach(function (d, i) {
-		   graph.nodes[i] = { "name": d };
-		 });
-
-	  sankey
-		.nodes(graph.nodes)
-		.links(graph.links)
-		.layout(32);
-
-	// add in the links
-	  var link = svgMlb4.append("g").selectAll(".link")
-		  .data(graph.links)
-		.enter().append("path")
-		  .attr("class", "link")
-		  .attr("d", path)
-		  .style("stroke-width", function(d) { return Math.max(1, d.dy); })
-		  .sort(function(a, b) { return b.dy - a.dy; });
-
-	// add the link titles
-	  link.append("title")
-			.text(function(d) {
-				return d.source.name + " → " + 
-					d.target.name + "\n" + format(d.value); });
-
-	// add in the nodes
-	  var node = svgMlb4.append("g").selectAll(".node")
-		  .data(graph.nodes)
-		.enter().append("g")
-		  .attr("class", "node")
-		  .attr("transform", function(d) { 
-			  return "translate(" + d.x + "," + d.y + ")"; })
-		.call(d3.behavior.drag()
-		  .origin(function(d) { return d; })
-		  .on("dragstart", function() { 
-			  this.parentNode.appendChild(this); })
-		  .on("drag", dragmove));
-
-	// add the rectangles for the nodes
-	  node.append("rect")
-		  .attr("height", function(d) { return (d.dy); })
-		  .attr("width", sankey.nodeWidth())
-		  .style("fill", '#476c85')
-		  .style("stroke", '#476c85')
-		.append("title")
-		  .text(function(d) { 
-			  return d.name; });
-
-	// add in the title for the nodes
-	  node.append("text")
-		  .attr('class', 'sankeyLabel')
-		  .attr("x", -6)
-		  .attr("y", function(d) { return d.dy / 2; })
-		  .attr("dy", ".35em")
-		  .attr("text-anchor", "end")
-		  .attr("transform", null)
-		  .text(function(d) { return d.name; })
-		.filter(function(d) { return d.x < width / 2; })
-		  .attr("x", 6 + sankey.nodeWidth())
-		  .attr("text-anchor", "start");
-
-	// the function for moving the nodes
-	  function dragmove(d) {
-		d3.select(this).attr("transform", 
-			"translate(" + d.x + "," + (
-					d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))
-				) + ")");
-		sankey.relayout();
-		link.attr("d", path);
-	  }
-	});
-
-</script>
-
-
-
-<!-- :::::::::::::::::::::::::::::::::::::: -->
-<!-- NHL graph -->
-<!-- :::::::::::::::::::::::::::::::::::::: -->
-
-<script>
-
-	var margin = {top: 10, right: 10, bottom: 10, left: 10},
-		width = 400 - margin.left - margin.right,
-		height = 400 - margin.top - margin.bottom;
-
-	// text display on hover
-	var formatNumber = d3.format(",.2f"),    // two decimal places
-		format = function(d) { return Math.round(100*formatNumber(d)) + "% of the time"; },
-		color = d3.scale.category10().range(["#3648c7", "#b4baea", "#828ddc", "#505fce", "#1d31c0", "#051bba", "#03106f", "#010837"]);
-
-	// append the svg canvas to the page
-	var svgNhl = d3.select("#nhlchart").append("svg")
-		.attr("width", width + margin.left + margin.right)
-		.attr("height", height + margin.top + margin.bottom)
-	  .append("g")
-		.attr("transform", 
-			  "translate(" + margin.left + "," + margin.top + ")");
-
-	// Set the sankey diagram properties
-	var sankey = d3.sankey()
-		.nodeWidth(36)
-		.nodePadding(20)
-		.size([width, height]);
-
-	var path = sankey.link();
-
-	// load the data (using the timelyportfolio csv method)
-	d3.csv("nhlSummary.csv", function(error, data) {
-
-	  //set up graph in same style as original example but empty
-	  graph = {"nodes" : [], "links" : []};
-
-		data.forEach(function (d) {
-		  graph.nodes.push({ "name": d.source });
-		  graph.nodes.push({ "name": d.target });
-		  graph.links.push({ "source": d.source,
-							 "target": d.target,
-							 "value": +d.value });
-		 });
-
-		 // return only the distinct / unique nodes
-		 graph.nodes = d3.keys(d3.nest()
-		   .key(function (d) { return d.name; })
-		   .map(graph.nodes));
-
-		 // loop through each link replacing the text with its index from node
-		 graph.links.forEach(function (d, i) {
-		   graph.links[i].source = graph.nodes.indexOf(graph.links[i].source);
-		   graph.links[i].target = graph.nodes.indexOf(graph.links[i].target);
-		 });
-
-		 //now loop through each nodes to make nodes an array of objects
-		 // rather than an array of strings
-		 graph.nodes.forEach(function (d, i) {
-		   graph.nodes[i] = { "name": d };
-		 });
-
-	  sankey
-		.nodes(graph.nodes)
-		.links(graph.links)
-		.layout(32);
-
-	// add in the links
-	  var link = svgNhl.append("g").selectAll(".link")
-		  .data(graph.links)
-		.enter().append("path")
-		  .attr("class", "link")
-		  .attr("d", path)
-		  .style("stroke-width", function(d) { return Math.max(1, d.dy); })
-		  .sort(function(a, b) { return b.dy - a.dy; });
-
-	// add the link titles
-	  link.append("title")
-			.text(function(d) {
-				return d.source.name + " → " + 
-					d.target.name + "\n" + format(d.value); });
-
-	// add in the nodes
-	  var node = svgNhl.append("g").selectAll(".node")
-		  .data(graph.nodes)
-		.enter().append("g")
-		  .attr("class", "node")
-		  .attr("transform", function(d) { 
-			  return "translate(" + d.x + "," + d.y + ")"; })
-		.call(d3.behavior.drag()
-		  .origin(function(d) { return d; })
-		  .on("dragstart", function() { 
-			  this.parentNode.appendChild(this); })
-		  .on("drag", dragmove));
-
-	// add the rectangles for the nodes
-	  node.append("rect")
-		  .attr("height", function(d) { return (d.dy); })
-		  .attr("width", sankey.nodeWidth())
-		  .style("fill", '#666666')
-		  .style("stroke", '#666666')
-		.append("title")
-		  .text(function(d) { 
-			  return d.name; });
-
-	// add in the title for the nodes
-	  node.append("text")
-		  .attr('class', 'sankeyLabel')
-		  .attr("x", -6)
-		  .attr("y", function(d) { return d.dy / 2; })
-		  .attr("dy", ".35em")
-		  .attr("text-anchor", "end")
-		  .attr("transform", null)
-		  .text(function(d) { return d.name; })
-		.filter(function(d) { return d.x < width / 2; })
-		  .attr("x", 6 + sankey.nodeWidth())
-		  .attr("text-anchor", "start");
-
-	// the function for moving the nodes
-	  function dragmove(d) {
-		d3.select(this).attr("transform", 
-			"translate(" + d.x + "," + (
-					d.y = Math.max(0, Math.min(height - d.dy, d3.event.y))
-				) + ")");
-		sankey.relayout();
-		link.attr("d", path);
-	  }
-	});
-
-</script>
-
-
-
-
-<!-- <svg class='groupedBar' style = 'height: 300px; width: 700px'></svg> -->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<script>
-
-// NFL Bar Chart
-
-var margin = {top: 20, right: 20, bottom: 30, left: 30},
-	nflBarWidth = 210 - margin.left - margin.right,
-	nflBarHeight = 250 - margin.top - margin.bottom;
-
-var y = d3.scale.linear()
-	.range([nflBarHeight, 0]);
-
-var x = d3.scale.ordinal()
-	.domain(["1st", "2nd", "3rd", "4th", "5th", "6th"])
-	.rangeRoundBands([0, nflBarWidth], .1);
-
-
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom")
- 
- var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
-
-var chart = d3.select(".nflBar")
-    .attr("width", nflBarWidth + margin.left + margin.right)
-    .attr("height", nflBarHeight + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-
-d3.csv("nflBar.csv", type, function(error, data) {
-  y.domain([0, .75]);
-
-  var barWidth = nflBarWidth / data.length;
-
-  var bar = chart.selectAll("g")
-	  .data(data)
-	.enter().append("g")
-	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
-
-  bar.append("rect")
-	  .attr("y", function(d) { return y(d.value); })
-	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
-	  .attr("width", barWidth - 1)
-	  .attr("class", "bar") ;
-
-  bar.append("text")
-	  .attr('class','barText')
-	  .attr("x", barWidth/2)
-	  .attr("y", function(d) { return y(d.value) + 3; })
-	  .attr("dy", "1em")
-	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
-	  .style('fill', 'white')
-	  .style('opacity', 0);
-
-
-
-	// Append axes
-	chart.append("g")
-	    .attr("class", "x axis")
-	    .attr("transform", "translate(0," + nflBarHeight + ")")
-	    .call(xAxis);
-
-	chart.append("g")
-	    .attr("class", "y axis")
-	    .call(yAxis);    
-
-    chart.append("text")
-	    .attr("x", (nflBarWidth / 2))             
-	    .attr("y", 0 + (margin.top))
-	    .attr("text-anchor", "middle")  
-	    .attr('class','barTitle')
-	    .text("NFL");
-
-
-
-// Turn the text white when you mouse over
-	bar.on("mouseover", function() {
-		d3.select(this)
-			.select("text")
-			.style("opacity", 1);
-	}).on("mouseout", function() {
-		d3.select(this)
-			.select("text")
-			.style("opacity", 0);
-		});
-
-	});
-
-
-function type(d) {
-	d.value = +d.value; // coerce to number
-	return d;
 }
 
+sankify('nflchart', 'nflSummary.csv')
+sankify('nbachart', 'nbaSummarySankey.csv')
+sankify('mlb4chart', 'mlbSummaryFourSeeds.csv')
+sankify('nhlchart', 'nhlSummarySankey.csv')
+
+
+</script>
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- Bar charts -->
+
+<script>
+
+function barChart(chart, dataset, chartTitle, fifth = '5th', sixth = '6th'){
+
+	var margin = {top: 20, right: 20, bottom: 30, left: 30},
+		width = 210 - margin.left - margin.right,
+		height = 250 - margin.top - margin.bottom;
+
+	var y = d3.scale.linear()
+		.range([height, 0]);
+
+	var x = d3.scale.ordinal()
+		.domain(["1st", "2nd", "3rd", "4th", fifth, sixth])
+		.rangeRoundBands([0, width], .1);
+
+
+	var xAxis = d3.svg.axis()
+	    .scale(x)
+	    .orient("bottom")
+	 
+	 var yAxis = d3.svg.axis()
+	    .scale(y)
+	    .orient("left")
+
+	var chart = d3.select("."+ chart)
+	    .attr("width", width + margin.left + margin.right)
+	    .attr("height", height + margin.top + margin.bottom)
+	  .append("g")
+	    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+	d3.csv(dataset + ".csv", type, function(error, data) {
+	  y.domain([0, .75]);
+
+	  var barWidth = width / data.length;
+
+	  var bar = chart.selectAll("g")
+		  .data(data)
+		.enter().append("g")
+		  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
+
+	  bar.append("rect")
+		  .attr("y", function(d) { return y(d.value); })
+		  .attr("height", function(d) { return height - y(d.value); })
+		  .attr("width", barWidth - 1)
+		  .attr("class", "bar")
+		  .style('fill','#0a78c2') ;
+
+	  bar.append("text")
+		  .attr('class','barText')
+		  .attr("x", barWidth/2)
+		  .attr("y", function(d) { return y(d.value) + 3; })
+		  .attr("dy", "1em")
+		  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
+		  .style('fill', 'white')
+		  .style('opacity', 0);
+
+
+
+		// Append axes
+		chart.append("g")
+		    .attr("class", "x axis")
+		    .attr("transform", "translate(0," + height + ")")
+		    .call(xAxis);
+
+		chart.append("g")
+		    .attr("class", "y axis")
+		    .call(yAxis);    
+
+	    chart.append("text")
+		    .attr("x", (width / 2))             
+		    .attr("y", 0 + (margin.top))
+		    .attr("text-anchor", "middle")  
+		    .attr('class','barTitle')
+		    .text(chartTitle);
+
+
+
+	// Turn the text white when you mouse over
+		bar.on("mouseover", function() {
+			d3.select(this)
+				.select("text")
+				.style("opacity", 1);
+		}).on("mouseout", function() {
+			d3.select(this)
+				.select("text")
+				.style("opacity", 0);
+			});
+
+		});
+
+
+	function type(d) {
+		d.value = +d.value; // coerce to number
+		return d;
+	}
+
+};
+
+barChart('nflBar','nflBar', 'NFL')
+barChart('nbaBar','nbaBar', 'NBA')
+barChart('mlbFourBar','mlbFourBar', 'MLB', fifth = 'n/a', sixth = ' n/a')
+barChart('nhlBar','nhlBar', 'NHL')
 
 
 
@@ -721,87 +332,85 @@ function type(d) {
 
 
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom")
+// var xAxis = d3.svg.axis()
+//     .scale(x)
+//     .orient("bottom")
  
- var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
+//  var yAxis = d3.svg.axis()
+//     .scale(y)
+//     .orient("left")
 
-var chartNba = d3.select(".nbaBar")
-    .attr("width", nflBarWidth + margin.left + margin.right)
-    .attr("height", nflBarHeight + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-
-d3.csv("nbaBar.csv", type, function(error, data) {
-  y.domain([0, .75]);
-
-  var barWidth = nflBarWidth / data.length;
-
-  var bar = chartNba.selectAll("g")
-	  .data(data)
-	.enter().append("g")
-	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
-
-  bar.append("rect")
-	  .attr("y", function(d) { return y(d.value); })
-	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
-	  .attr("width", barWidth - 1)
-	  .attr("class", "bar") ;
-
-  bar.append("text")
-	  .attr('class','barText')
-	  .attr("x", barWidth/2)
-	  .attr("y", function(d) { return y(d.value) + 3; })
-	  .attr("dy", "1em")
-	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
-	  .style('fill', 'white')
-	  .style('opacity', 0);
+// var chartNba = d3.select(".nbaBar")
+//     .attr("width", nflBarWidth + margin.left + margin.right)
+//     .attr("height", nflBarHeight + margin.top + margin.bottom)
+//   .append("g")
+//     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
 
-	// Append axes
-	chartNba.append("g")
-	    .attr("class", "x axis")
-	    .attr("transform", "translate(0," + nflBarHeight + ")")
-	    .call(xAxis);
+// d3.csv("nbaBar.csv", type, function(error, data) {
+//   y.domain([0, .75]);
 
-	chartNba.append("g")
-	    .attr("class", "y axis")
-	    .call(yAxis);    
+//   var barWidth = nflBarWidth / data.length;
 
-    chartNba.append("text")
-	    .attr("x", (nflBarWidth / 2))             
-	    .attr("y", 0 + (margin.top))
-	    .attr("text-anchor", "middle")  
-	    .attr('class','barTitle')
-	    .text("NBA");
+//   var bar = chartNba.selectAll("g")
+// 	  .data(data)
+// 	.enter().append("g")
+// 	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
 
-// Turn the text white when you mouse over
-	bar.on("mouseover", function() {
-		d3.select(this)
-			.select("text")
-			.style("opacity", 1);
-	}).on("mouseout", function() {
-		d3.select(this)
-			.select("text")
-			.style("opacity", 0);
-		});
+//   bar.append("rect")
+// 	  .attr("y", function(d) { return y(d.value); })
+// 	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
+// 	  .attr("width", barWidth - 1)
+// 	  .attr("class", "bar")
+// 	  .style('fill','#2473a8') ;
 
-	});
-
-
-function type(d) {
-	d.value = +d.value; // coerce to number
-	return d;
-}
+//   bar.append("text")
+// 	  .attr('class','barText')
+// 	  .attr("x", barWidth/2)
+// 	  .attr("y", function(d) { return y(d.value) + 3; })
+// 	  .attr("dy", "1em")
+// 	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
+// 	  .style('fill', 'white')
+// 	  .style('opacity', 0);
 
 
 
+// 	// Append axes
+// 	chartNba.append("g")
+// 	    .attr("class", "x axis")
+// 	    .attr("transform", "translate(0," + nflBarHeight + ")")
+// 	    .call(xAxis);
+
+// 	chartNba.append("g")
+// 	    .attr("class", "y axis")
+// 	    .call(yAxis);    
+
+//     chartNba.append("text")
+// 	    .attr("x", (nflBarWidth / 2))             
+// 	    .attr("y", 0 + (margin.top))
+// 	    .attr("text-anchor", "middle")  
+// 	    .attr('class','barTitle')
+// 	    .text("NBA");
+
+// // Turn the text white when you mouse over
+// 	bar.on("mouseover", function() {
+// 		d3.select(this)
+// 			.select("text")
+// 			.style("opacity", 1);
+// 	}).on("mouseout", function() {
+// 		d3.select(this)
+// 			.select("text")
+// 			.style("opacity", 0);
+// 		});
+
+// 	});
+
+
+// function type(d) {
+// 	d.value = +d.value; // coerce to number
+// 	return d;
+// }
 
 
 
@@ -819,93 +428,94 @@ function type(d) {
 
 
 
-// MLB Chart
 
-var xMlb = d3.scale.ordinal()
-	.domain(["1st", "2nd", "3rd", "4th", "n/a", "n/a "])
-	.rangeRoundBands([0, nflBarWidth], .1);
 
-var xAxisMlb = d3.svg.axis()
-    .scale(xMlb)
-    .orient("bottom")
+
+// // MLB Chart
+
+// var xMlb = d3.scale.ordinal()
+// 	.domain(["1st", "2nd", "3rd", "4th", "n/a", "n/a "])
+// 	.rangeRoundBands([0, nflBarWidth], .1);
+
+// var xAxisMlb = d3.svg.axis()
+//     .scale(xMlb)
+//     .orient("bottom")
  
- var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
+//  var yAxis = d3.svg.axis()
+//     .scale(y)
+//     .orient("left")
 
-var chartMlb = d3.select(".mlbFourBar")
-    .attr("width", nflBarWidth + margin.left + margin.right)
-    .attr("height", nflBarHeight + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-
-d3.csv("mlbFourBar.csv", type, function(error, data) {
-  y.domain([0, .75]);
-
-  var barWidth = nflBarWidth / data.length;
-
-  var bar = chartMlb.selectAll("g")
-	  .data(data)
-	.enter().append("g")
-	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
-
-  bar.append("rect")
-	  .attr("y", function(d) { return y(d.value); })
-	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
-	  .attr("width", barWidth - 1)
-	  .attr("class", "bar") ;
-
-  bar.append("text")
-	  .attr('class','barText')
-	  .attr("x", barWidth/2)
-	  .attr("y", function(d) { return y(d.value) + 3; })
-	  .attr("dy", "1em")
-	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
-	  .style('fill', 'white')
-	  .style('opacity', 0);
+// var chartMlb = d3.select(".mlbFourBar")
+//     .attr("width", nflBarWidth + margin.left + margin.right)
+//     .attr("height", nflBarHeight + margin.top + margin.bottom)
+//   .append("g")
+//     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
 
-	// Append axes
-	chartMlb.append("g")
-	    .attr("class", "x axis")
-	    .attr("transform", "translate(0," + nflBarHeight + ")")
-	    .call(xAxisMlb);
+// d3.csv("mlbFourBar.csv", type, function(error, data) {
+//   y.domain([0, .75]);
 
-	chartMlb.append("g")
-	    .attr("class", "y axis")
-	    .call(yAxis);    
+//   var barWidth = nflBarWidth / data.length;
 
-    chartMlb.append("text")
-	    .attr("x", (nflBarWidth / 2))             
-	    .attr("y", 0 + (margin.top))
-	    .attr("text-anchor", "middle")  
-	    .attr('class','barTitle')
-	    .text("MLB");	    
+//   var bar = chartMlb.selectAll("g")
+// 	  .data(data)
+// 	.enter().append("g")
+// 	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
 
-// Turn the text white when you mouse over
-	bar.on("mouseover", function() {
-		d3.select(this)
-			.select("text")
-			.style("opacity", 1);
-	}).on("mouseout", function() {
-		d3.select(this)
-			.select("text")
-			.style("opacity", 0);
-		});
+//   bar.append("rect")
+// 	  .attr("y", function(d) { return y(d.value); })
+// 	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
+// 	  .attr("width", barWidth - 1)
+// 	  .attr("class", "bar")
+// 	  .style('fill','#476c85') ;
 
-	});
-
-
-function type(d) {
-	d.value = +d.value; // coerce to number
-	return d;
-}
+//   bar.append("text")
+// 	  .attr('class','barText')
+// 	  .attr("x", barWidth/2)
+// 	  .attr("y", function(d) { return y(d.value) + 3; })
+// 	  .attr("dy", "1em")
+// 	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
+// 	  .style('fill', 'white')
+// 	  .style('opacity', 0);
 
 
 
+// 	// Append axes
+// 	chartMlb.append("g")
+// 	    .attr("class", "x axis")
+// 	    .attr("transform", "translate(0," + nflBarHeight + ")")
+// 	    .call(xAxisMlb);
+
+// 	chartMlb.append("g")
+// 	    .attr("class", "y axis")
+// 	    .call(yAxis);    
+
+//     chartMlb.append("text")
+// 	    .attr("x", (nflBarWidth / 2))             
+// 	    .attr("y", 0 + (margin.top))
+// 	    .attr("text-anchor", "middle")  
+// 	    .attr('class','barTitle')
+// 	    .text("MLB");	    
+
+// // Turn the text white when you mouse over
+// 	bar.on("mouseover", function() {
+// 		d3.select(this)
+// 			.select("text")
+// 			.style("opacity", 1);
+// 	}).on("mouseout", function() {
+// 		d3.select(this)
+// 			.select("text")
+// 			.style("opacity", 0);
+// 		});
+
+// 	});
+
+
+// function type(d) {
+// 	d.value = +d.value; // coerce to number
+// 	return d;
+// }
 
 
 
@@ -922,88 +532,92 @@ function type(d) {
 
 
 
-// NHL Chart
 
 
 
-var xAxis = d3.svg.axis()
-    .scale(x)
-    .orient("bottom")
+// // NHL Chart
+
+
+
+// var xAxis = d3.svg.axis()
+//     .scale(x)
+//     .orient("bottom")
  
- var yAxis = d3.svg.axis()
-    .scale(y)
-    .orient("left")
+//  var yAxis = d3.svg.axis()
+//     .scale(y)
+//     .orient("left")
 
-var chartNhl = d3.select(".nhlBar")
-    .attr("width", nflBarWidth + margin.left + margin.right)
-    .attr("height", nflBarHeight + margin.top + margin.bottom)
-  .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-
-
-d3.csv("nhlBar.csv", type, function(error, data) {
-  y.domain([0, .75]);
-
-  var barWidth = nflBarWidth / data.length;
-
-  var bar = chartNhl.selectAll("g")
-	  .data(data)
-	.enter().append("g")
-	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
-
-  bar.append("rect")
-	  .attr("y", function(d) { return y(d.value); })
-	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
-	  .attr("width", barWidth - 1)
-	  .attr("class", "bar") ;
-
-  bar.append("text")
-	  .attr('class','barText')
-	  .attr("x", barWidth/2)
-	  .attr("y", function(d) { return y(d.value) + 3; })
-	  .attr("dy", "1em")
-	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
-	  .style('fill', 'white')
-	  .style('opacity', 0);
+// var chartNhl = d3.select(".nhlBar")
+//     .attr("width", nflBarWidth + margin.left + margin.right)
+//     .attr("height", nflBarHeight + margin.top + margin.bottom)
+//   .append("g")
+//     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
 
 
-	// Append axes
-	chartNhl.append("g")
-	    .attr("class", "x axis")
-	    .attr("transform", "translate(0," + nflBarHeight + ")")
-	    .call(xAxis);
+// d3.csv("nhlBar.csv", type, function(error, data) {
+//   y.domain([0, .75]);
 
-	chartNhl.append("g")
-	    .attr("class", "y axis")
-	    .call(yAxis);    
+//   var barWidth = nflBarWidth / data.length;
 
-    chartNhl.append("text")
-	    .attr("x", (nflBarWidth / 2))             
-	    .attr("y", 0 + (margin.top))
-	    .attr("text-anchor", "middle")  
-	    .attr('class','barTitle')
-	    .text("NHL");	    
+//   var bar = chartNhl.selectAll("g")
+// 	  .data(data)
+// 	.enter().append("g")
+// 	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
 
-// Turn the text white when you mouse over
-	bar.on("mouseover", function() {
-		d3.select(this)
-			.select("text")
-			.style("opacity", 1);
-	}).on("mouseout", function() {
-		d3.select(this)
-			.select("text")
-			.style("opacity", 0);
-		});
+//   bar.append("rect")
+// 	  .attr("y", function(d) { return y(d.value); })
+// 	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
+// 	  .attr("width", barWidth - 1)
+// 	  .attr("class", "bar")
+// 	  .style('fill','#666666') ;
 
-	});
+//   bar.append("text")
+// 	  .attr('class','barText')
+// 	  .attr("x", barWidth/2)
+// 	  .attr("y", function(d) { return y(d.value) + 3; })
+// 	  .attr("dy", "1em")
+// 	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
+// 	  .style('fill', 'white')
+// 	  .style('opacity', 0);
 
 
-function type(d) {
-	d.value = +d.value; // coerce to number
-	return d;
-}
+
+// 	// Append axes
+// 	chartNhl.append("g")
+// 	    .attr("class", "x axis")
+// 	    .attr("transform", "translate(0," + nflBarHeight + ")")
+// 	    .call(xAxis);
+
+// 	chartNhl.append("g")
+// 	    .attr("class", "y axis")
+// 	    .call(yAxis);    
+
+//     chartNhl.append("text")
+// 	    .attr("x", (nflBarWidth / 2))             
+// 	    .attr("y", 0 + (margin.top))
+// 	    .attr("text-anchor", "middle")  
+// 	    .attr('class','barTitle')
+// 	    .text("NHL");	    
+
+// // Turn the text white when you mouse over
+// 	bar.on("mouseover", function() {
+// 		d3.select(this)
+// 			.select("text")
+// 			.style("opacity", 1);
+// 	}).on("mouseout", function() {
+// 		d3.select(this)
+// 			.select("text")
+// 			.style("opacity", 0);
+// 		});
+
+// 	});
+
+
+// function type(d) {
+// 	d.value = +d.value; // coerce to number
+// 	return d;
+// }
 
 
 

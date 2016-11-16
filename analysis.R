@@ -562,8 +562,20 @@ write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
                                                                          ifelse(target == 8, '8th seed' , NA)))))))))
     
     
+    
+    # Because of a weird quirk in the D3 Sankey graphs, manually fill in some of the (empty) seed-game pairings
+    six <- c('World Champs','6th seed',0)
+    seven <- c('World Champs','7th seed',0)	
+    nhlSummarySankey <- rbind(nhlSummary, six, seven)
+    nhlSummarySankey <- nhlSummarySankey %>%
+        ungroup() %>%
+        mutate(category =  factor(source, levels = playoffOrder)) %>%
+        arrange(category, target) %>%
+        select(-category)    
+    
 # Save
 write.csv(nhlSummary, 'nhlSummary.csv', row.names = F)
+write.csv(nhlSummarySankey, 'nhlSummarySankey.csv', row.names = F)
 
 
 
