@@ -1,39 +1,39 @@
 "source","target","value"
-"World Champs",1,0.368421052631579
-"World Champs",2,0.263157894736842
-"World Champs",3,0.157894736842105
-"World Champs",4,0.105263157894737
-"World Champs",5,0.0526315789473684
-"World Champs",8,0.0526315789473684
-"Stanley Cup Final",1,0.263157894736842
-"Stanley Cup Final",2,0.210526315789474
-"Stanley Cup Final",3,0.131578947368421
-"Stanley Cup Final",4,0.157894736842105
-"Stanley Cup Final",5,0.0263157894736842
-"Stanley Cup Final",6,0.0526315789473684
-"Stanley Cup Final",7,0.105263157894737
-"Stanley Cup Final",8,0.0526315789473684
-"Conference Finals",1,0.263157894736842
-"Conference Finals",2,0.184210526315789
-"Conference Finals",3,0.131578947368421
-"Conference Finals",4,0.157894736842105
-"Conference Finals",5,0.0657894736842105
-"Conference Finals",6,0.105263157894737
-"Conference Finals",7,0.0526315789473684
-"Conference Finals",8,0.0394736842105263
-"Conference Semi-Finals",1,0.184210526315789
-"Conference Semi-Finals",2,0.131578947368421
-"Conference Semi-Finals",3,0.151315789473684
-"Conference Semi-Finals",4,0.157894736842105
-"Conference Semi-Finals",5,0.0921052631578947
-"Conference Semi-Finals",6,0.0986842105263158
-"Conference Semi-Finals",7,0.118421052631579
-"Conference Semi-Finals",8,0.0657894736842105
-"Conference Quarter-Finals",1,0.125
-"Conference Quarter-Finals",2,0.125
-"Conference Quarter-Finals",3,0.125
-"Conference Quarter-Finals",4,0.125
-"Conference Quarter-Finals",5,0.125
-"Conference Quarter-Finals",6,0.125
-"Conference Quarter-Finals",7,0.125
-"Conference Quarter-Finals",8,0.125
+"World Champs","1st seed",0.368421052631579
+"World Champs","2nd seed",0.263157894736842
+"World Champs","3rd seed",0.157894736842105
+"World Champs","4th seed",0.105263157894737
+"World Champs","5th seed",0.0526315789473684
+"World Champs","8th seed",0.0526315789473684
+"Stanley Cup Final","1st seed",0.263157894736842
+"Stanley Cup Final","2nd seed",0.210526315789474
+"Stanley Cup Final","3rd seed",0.131578947368421
+"Stanley Cup Final","4th seed",0.157894736842105
+"Stanley Cup Final","5th seed",0.0263157894736842
+"Stanley Cup Final","6th seed",0.0526315789473684
+"Stanley Cup Final","7th seed",0.105263157894737
+"Stanley Cup Final","8th seed",0.0526315789473684
+"Conference Finals","1st seed",0.263157894736842
+"Conference Finals","2nd seed",0.184210526315789
+"Conference Finals","3rd seed",0.131578947368421
+"Conference Finals","4th seed",0.157894736842105
+"Conference Finals","5th seed",0.0657894736842105
+"Conference Finals","6th seed",0.105263157894737
+"Conference Finals","7th seed",0.0526315789473684
+"Conference Finals","8th seed",0.0394736842105263
+"Conference Semi-Finals","1st seed",0.184210526315789
+"Conference Semi-Finals","2nd seed",0.131578947368421
+"Conference Semi-Finals","3rd seed",0.151315789473684
+"Conference Semi-Finals","4th seed",0.157894736842105
+"Conference Semi-Finals","5th seed",0.0921052631578947
+"Conference Semi-Finals","6th seed",0.0986842105263158
+"Conference Semi-Finals","7th seed",0.118421052631579
+"Conference Semi-Finals","8th seed",0.0657894736842105
+"Conference Quarter-Finals","1st seed",0.125
+"Conference Quarter-Finals","2nd seed",0.125
+"Conference Quarter-Finals","3rd seed",0.125
+"Conference Quarter-Finals","4th seed",0.125
+"Conference Quarter-Finals","5th seed",0.125
+"Conference Quarter-Finals","6th seed",0.125
+"Conference Quarter-Finals","7th seed",0.125
+"Conference Quarter-Finals","8th seed",0.125

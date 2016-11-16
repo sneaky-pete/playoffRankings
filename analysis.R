@@ -410,13 +410,23 @@ write.csv(nbaSummarySankey, 'nbaSummarySankey.csv', row.names = F)
         ungroup() %>%
         mutate(category =  factor(source, levels = playoffOrder)) %>%
         arrange(category, target) %>%
-        select(-category)
+        select(-category) %>%    
+        # Recode table so the graph is descriptive
+        mutate(target = ifelse(target == 1, '1st seed' , 
+                               ifelse(target == 2, '2nd seed' , 
+                                      ifelse(target == 3, '3rd seed' , 
+                                             ifelse(target == 4, '4th seed' , 
+                                                    ifelse(target == 5, '5th seed' , 
+                                                           ifelse(target == 6, '6th seed', 
+                                                                  ifelse(target == 7, '7th seed' , 
+                                                                         ifelse(target == 8, '8th seed' , NA)))))))))
+    
     
     # Create a vector with playoff rounds in the desired order (need to be ordered properly for d3 sankey graphing later)
     playoffOrder<- c("World Champs", "World Series", "League Championship", "Divisional Series")
     # Now create a summary table for each of the different playoff formats
     mlbSummaryFourSeeds <- mlbFourSeeds %>%
-        group_by(roundGeneral, seed) %>%
+        group_by(roundGeneral, seed) %>%    
         summarize(count = n()) %>%
         # Only examine up until the wild card was introduced. WC introduced in 2012, adding a few more seeds
         group_by(roundGeneral) %>%
@@ -427,7 +437,16 @@ write.csv(nbaSummarySankey, 'nbaSummarySankey.csv', row.names = F)
         ungroup() %>%
         mutate(category =  factor(source, levels = playoffOrder)) %>%
         arrange(category, target) %>%
-        select(-category)
+        select(-category) %>%    
+        # Recode table so the graph is descriptive
+        mutate(target = ifelse(target == 1, '1st seed' , 
+                               ifelse(target == 2, '2nd seed' , 
+                                      ifelse(target == 3, '3rd seed' , 
+                                             ifelse(target == 4, '4th seed' , 
+                                                    ifelse(target == 5, '5th seed' , 
+                                                           ifelse(target == 6, '6th seed', 
+                                                                  ifelse(target == 7, '7th seed' , 
+                                                                         ifelse(target == 8, '8th seed' , NA)))))))))
     
     # Create a vector with playoff rounds in the desired order (need to be ordered properly for d3 sankey graphing later)
     playoffOrder<- c("World Champs", "World Series", "League Championship", "Divisional Series", "Wild Card")
@@ -444,7 +463,16 @@ write.csv(nbaSummarySankey, 'nbaSummarySankey.csv', row.names = F)
         ungroup() %>%
         mutate(category =  factor(source, levels = playoffOrder)) %>%
         arrange(category, target) %>%
-        select(-category)
+        select(-category) %>%    
+        # Recode table so the graph is descriptive
+        mutate(target = ifelse(target == 1, '1st seed' , 
+                               ifelse(target == 2, '2nd seed' , 
+                                      ifelse(target == 3, '3rd seed' , 
+                                             ifelse(target == 4, '4th seed' , 
+                                                    ifelse(target == 5, '5th seed' , 
+                                                           ifelse(target == 6, '6th seed', 
+                                                                  ifelse(target == 7, '7th seed' , 
+                                                                         ifelse(target == 8, '8th seed' , NA)))))))))
 
 write.csv(mlbSummaryTwoSeeds, 'mlbSummaryTwoSeeds.csv', row.names = F)
 write.csv(mlbSummaryFourSeeds, 'mlbSummaryFourSeeds.csv', row.names = F)
@@ -522,7 +550,16 @@ write.csv(mlbSummaryFiveSeeds, 'mlbSummaryFiveSeeds.csv', row.names = F)
         ungroup() %>%
         mutate(category =  factor(source, levels = playoffOrder)) %>%
         arrange(category, target) %>%
-        select(-category)
+        select(-category) %>%    
+        # Recode table so the graph is descriptive
+        mutate(target = ifelse(target == 1, '1st seed' , 
+                               ifelse(target == 2, '2nd seed' , 
+                                      ifelse(target == 3, '3rd seed' , 
+                                             ifelse(target == 4, '4th seed' , 
+                                                    ifelse(target == 5, '5th seed' , 
+                                                           ifelse(target == 6, '6th seed', 
+                                                                  ifelse(target == 7, '7th seed' , 
+                                                                         ifelse(target == 8, '8th seed' , NA)))))))))
     
     
 # Save
@@ -534,25 +571,47 @@ write.csv(nhlSummary, 'nhlSummary.csv', row.names = F)
 
 
 
-################################################################################
-################################################################################
-### Chart creation
-################################################################################
-################################################################################
+###############################################################################
+###############################################################################
+### BAR CHART DATA
+###############################################################################
+###############################################################################
 
-nflBar <- nflSummary %>% 
-			filter(source == 'World Champs')
+# Filter to just percent of seeds that win the championship, for a bar chart I'm making
 
-ggplot(data=nflBar, aes(x=target, y=value)) +
-	geom_bar(stat="identity") +
-	ggtitle("Probably of winning the 'ship, by seed") +
-	scale_y_continuous(labels=percent) +
-	theme(text=element_text(family="Avenir"))
+nflWinners <- nflSummary %>%
+                filter(source == "World Champs") %>%
+                mutate(source = "NFL")
+
+nbaWinners <- nbaSummary %>%
+    filter(source == "World Champs") %>%
+    mutate(source = "NBA")
+
+mlbWinnersFour <- mlbSummaryFourSeeds %>%
+    filter(source == "World Champs") %>%
+    mutate(source = "MLB")
+
+nhlWinners <- nhlSummary %>%
+    filter(source == "World Champs") %>%
+    mutate(source = "NHL")
+
+allSportChamps <- rbind(nflWinners, nbaWinners, mlbWinnersFour, nhlWinners)
+
+allSportChampsWide <- spread(allSportChamps, target, value) %>%
+                        mutate_each(funs(round(.,2)), `1st seed`, `2nd seed`, `3rd seed`, `4th seed`, `5th seed`, `6th seed`, `8th seed`) %>%
+                        mutate(`7th seed` = 0) %>%
+                        rename(sport = source) %>%
+                        select(sport, `1st seed`, `2nd seed`, `3rd seed`, `4th seed`, `5th seed`, `6th seed`, `7th seed`, `8th seed`)
+
+allSportChampsWide[is.na(allSportChampsWide)] <- 0
 
 
-font_import("Trebuchet MS")
+# Save
+write.csv(allSportChampsWide, 'allSportsBar.csv', row.names = F)
+write.csv(nflWinners, 'nflBar.csv', row.names = F)
+write.csv(nbaWinners, 'nbaBar.csv', row.names = F)
+write.csv(mlbWinnersFour, 'mlbFourBar.csv', row.names = F)
+write.csv(nhlWinners, 'nhlBar.csv', row.names = F)
 
 
 
-test <- (nhlCompleteData%>% filter(round == 'Conference Quarter-Finals') %>% group_by(year, seed) %>% summarize(n = n()))
-View(nhlCompleteData%>% filter(round == 'Conference Quarter-Finals'))

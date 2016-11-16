@@ -14,7 +14,7 @@ body{
 .title{
   padding-top: 30px;
   text-align: center;
-  font-size: 44px;
+  font-size: 44pt;
 }
 
 .author{
@@ -54,31 +54,76 @@ body{
 
 .node text {
   pointer-events: none;
-  text-shadow: 0 1px 0 #fff;
+  font-size: 12pt;
+}
+
+.node text:hover {
+  pointer-events: none;
+  font-size: 12pt;
+  opacity: 1;
 }
 
 .link {
   fill: none;
-  stroke: #000;
-  stroke-opacity: .2;
+  stroke: black;
+  stroke-opacity: .1;
 }
 
 .link:hover {
   stroke-opacity: .5;
 }
 
+.sankeyLabel {
+	font-family: 'Lato', sans-serif;
+	font-weight: 400;
+}
+
 
 
 /*Bar chart stuff*/
 .bar{
-  fill: steelblue;
+  fill: #0a78c2;
 }
 
-.bar text{
-  fill: brown;
-  font: 10px sans-serif;
-  text-an	chor: middle;
+.barText {
+  fill: black;
+  font-size: 12px;
+  text-anchor: middle;
+  font-family: 'Lato', sans-serif;
+  font-weight: bold;
 }
 
 .bar:hover {
-  fill: brown;
+  fill: #666666;
+}
+
+.barTitle{
+	text-align: center;
+	font-family: 'Lato', sans-serif;
+	font-weight: bold;
+	margin-top: 16px;
+}
+
+.axis text {
+  font-family: 'Lato', sans-serif;
+  font-size: 10px;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+
+
+
+
+/*Mobile responsive styling*/
+
+@media (max-width: 600px) {
+  body {
+    font-size: 25pt;
+  }
+}

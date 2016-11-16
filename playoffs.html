@@ -3,7 +3,7 @@
 	<meta charset="utf-8">
 	<link rel="stylesheet" type="text/css" href="css/bootstrap.css">
 	<link rel="stylesheet" type="text/css" href="css/style.css">
-	<link href="https://fonts.googleapis.com/css?family=Abhaya+Libre|Lato:300,700" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Abhaya+Libre|Lato:300,400,700" rel="stylesheet">
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<script src="js/sankey.js"></script>
 	<link rel="icon" type="image/png" href="../images/favicon.png">
@@ -14,29 +14,37 @@
 <div>
 	<h1 class = 'title'>For which sports do playoff seedings matter?</h1>
 	<p class = 'author'>Musings, by Pete Hlawitschka</p>
+	<p style = 'text-align: center; color: red'><b>[WORK IN PROGRESS...]</b></p>
 	<p>This year, against all odds, the Cubs won the title, the Warriors blew a 3-1 lead, and the 15-1 Panthers lost in the Super Bowl. But should we be surprised? In all of these cases, the winning team was a 1-seed, the top ranked team on their side of the bracket, so why is everybody so surprised? (The Stanley Cup champion Penguins were a 2-seed).</p>
 
 	 <p>In some sports, it seems like the highest-ranked teams always make it to the championship. In others, it seems like anything could happen. So I was curious to see -- in which sports are playoff seedings most predictive of the eventual champion?</p>
 	
-	<p>I scraped playoff and seed data for the four major sports: football, basketball, baseball, and hockey, going back to 1980. For a first look, I generated a few Sankey charts to show how far the different seeds make it in each sport. </p>
+	<p>I scraped playoff and seed data (from <a href = 'http://www.sports-reference.com/'>sports-reference</a>) for the four major sports: football, basketball, baseball, and hockey, going back to 1980. For a first look, I generated a few Sankey charts to show how far the different seeds make it in each sport. Hover over the links to see the numbers. </p>
 
-	<p>So how often does the top seed win it all for the four major sports? The top seed wins 70% of the time in the NBA, compared to just 40% in the MLB.</p>
+	<div id = 'sankeyCharts'>
+		<div class = 'row' style = 'text-align: center'>
+			<div class = 'sankey' >NFL<p class = 'chart' id="nflchart"></p></div>
+			<div class = 'sankey' >NBA<p class = 'chart'  id="nbachart"></p></div>
+		</div>
+		<div class = 'row' style = 'text-align: center'>
+			<div class = 'sankey' >MLB<p class = 'chart'  id="mlb4chart"></p></div>
+			<div class = 'sankey' >NHL<p class = 'chart'  id="nhlchart"></p></div>
+		</div>
+	</div>
 	
-	<p>CHART</p>
-	
+	<p style = 'margin-top: 30px'>Looking closer at just who wins it all, we see that top-seeded NBA teams have done very well in the past:</p>
+
+	<div class = 'row' style = 'margin: 20px auto'>
+		<svg class="nflBar"></svg>
+		<svg class="nbaBar"></svg>
+		<svg class="mlbFourBar"></svg>
+		<svg class="nhlBar"></svg>
+	</div>
+
 	<p>I have a few thoughts on why this might be. Some have to do with the sport -- scoring in basketball is not as random than in the other sports. NBA teams are averaging just under 100 posessions a game -- that's about 100 chances to score. NFL teams, by contrast, average about 12 posessions per game, MLB teams average 34 at bats per game, and NHL teams average about 30 shots on goal per game. The variance in score is what really matters. The playoff structure is also different between sports. The NFL uses a one-game format, whereas the other sports play longer series. </p>
 
 
 	<p>We could do a couple of things. Regression. See with data viz. And look at different measures of predictiveness -- so not just the champion but also the last place. In other words, in which sport is it the biggest disadvantage to be last. Another metric would be in which sport are there the most upsets? And in which sport are there the biggest upsets? </p>
-
-	<div class = 'row' style = 'text-align: center'>
-		<div class = 'sankey' >NFL<p class = 'chart' id="nflchart"></p></div>
-		<div class = 'sankey' >NBA<p class = 'chart'  id="nbachart"></p></div>
-	</div>
-	<div class = 'row' style = 'text-align: center'>
-		<div class = 'sankey' >MLB<p class = 'chart'  id="mlb4chart"></p></div>
-		<div class = 'sankey' >NHL<p class = 'chart'  id="nhlchart"></p></div>
-	</div>
 
 
 </div>
@@ -59,7 +67,7 @@
 	// text display on hover
 	var formatNumber = d3.format(",.2f"),    // two decimal places
 		format = function(d) { return 100*formatNumber(d) + "% of the time"; },
-		color = d3.scale.category20();
+		color = d3.scale.category10().range(["#3648c7", "#b4baea", "#828ddc", "#505fce", "#1d31c0", "#051bba", "#03106f", "#010837"]);
 
 	// append the svg canvas to the page
 	var svgNfl = d3.select("#nflchart").append("svg")
@@ -145,16 +153,15 @@
 	  node.append("rect")
 		  .attr("height", function(d) { return (d.dy); })
 		  .attr("width", sankey.nodeWidth())
-		  .style("fill", function(d) { 
-			  return d.color = color(d.name.replace(/ .*/, "")); })
-		  .style("stroke", function(d) { 
-			  return d3.rgb(d.color).darker(2); })
+		  .style("fill", '#0a78c2')
+		  .style("stroke", '#0a78c2')
 		.append("title")
 		  .text(function(d) { 
 			  return d.name; });
 
 	// add in the title for the nodes
 	  node.append("text")
+		  .attr('class', 'sankeyLabel')
 		  .attr("x", -6)
 		  .attr("y", function(d) { return d.dy / 2; })
 		  .attr("dy", ".35em")
@@ -280,16 +287,15 @@
 	  node.append("rect")
 		  .attr("height", function(d) { return (d.dy); })
 		  .attr("width", sankey.nodeWidth())
-		  .style("fill", function(d) { 
-			  return d.color = color(d.name.replace(/ .*/, "")); })
-		  .style("stroke", function(d) { 
-			  return d3.rgb(d.color).darker(2); })
+		  .style("fill", '#2473a8')
+		  .style("stroke", '#2473a8')
 		.append("title")
 		  .text(function(d) { 
 			  return d.name; });
 
 	// add in the title for the nodes
 	  node.append("text")
+		  .attr('class', 'sankeyLabel')
 		  .attr("x", -6)
 		  .attr("y", function(d) { return d.dy / 2; })
 		  .attr("dy", ".35em")
@@ -413,16 +419,15 @@
 	  node.append("rect")
 		  .attr("height", function(d) { return (d.dy); })
 		  .attr("width", sankey.nodeWidth())
-		  .style("fill", function(d) { 
-			  return d.color = color(d.name.replace(/ .*/, "")); })
-		  .style("stroke", function(d) { 
-			  return d3.rgb(d.color).darker(2); })
+		  .style("fill", '#476c85')
+		  .style("stroke", '#476c85')
 		.append("title")
 		  .text(function(d) { 
 			  return d.name; });
 
 	// add in the title for the nodes
 	  node.append("text")
+		  .attr('class', 'sankeyLabel')
 		  .attr("x", -6)
 		  .attr("y", function(d) { return d.dy / 2; })
 		  .attr("dy", ".35em")
@@ -461,7 +466,7 @@
 	// text display on hover
 	var formatNumber = d3.format(",.2f"),    // two decimal places
 		format = function(d) { return Math.round(100*formatNumber(d)) + "% of the time"; },
-		color = d3.scale.category20();
+		color = d3.scale.category10().range(["#3648c7", "#b4baea", "#828ddc", "#505fce", "#1d31c0", "#051bba", "#03106f", "#010837"]);
 
 	// append the svg canvas to the page
 	var svgNhl = d3.select("#nhlchart").append("svg")
@@ -547,16 +552,15 @@
 	  node.append("rect")
 		  .attr("height", function(d) { return (d.dy); })
 		  .attr("width", sankey.nodeWidth())
-		  .style("fill", function(d) { 
-			  return d.color = color(d.name.replace(/ .*/, "")); })
-		  .style("stroke", function(d) { 
-			  return d3.rgb(d.color).darker(2); })
+		  .style("fill", '#666666')
+		  .style("stroke", '#666666')
 		.append("title")
 		  .text(function(d) { 
 			  return d.name; });
 
 	// add in the title for the nodes
 	  node.append("text")
+		  .attr('class', 'sankeyLabel')
 		  .attr("x", -6)
 		  .attr("y", function(d) { return d.dy / 2; })
 		  .attr("dy", ".35em")
@@ -583,55 +587,528 @@
 
 
 
+<!-- <svg class='groupedBar' style = 'height: 300px; width: 700px'></svg> -->
 
-<svg class="nflBar"></svg>
-<p>That's it, folks!</p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 <script>
 
-var nflBarWidth = 200,
-    nlfBarHeight = 200;
+// NFL Bar Chart
+
+var margin = {top: 20, right: 20, bottom: 30, left: 30},
+	nflBarWidth = 210 - margin.left - margin.right,
+	nflBarHeight = 250 - margin.top - margin.bottom;
 
 var y = d3.scale.linear()
-    .range([nlfBarHeight, 0]);
+	.range([nflBarHeight, 0]);
+
+var x = d3.scale.ordinal()
+	.domain(["1st", "2nd", "3rd", "4th", "5th", "6th"])
+	.rangeRoundBands([0, nflBarWidth], .1);
+
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+ 
+ var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
 
 var chart = d3.select(".nflBar")
-    .attr("width", nflBarWidth)
-    .attr("height", nlfBarHeight);
+    .attr("width", nflBarWidth + margin.left + margin.right)
+    .attr("height", nflBarHeight + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
 
 d3.csv("nflBar.csv", type, function(error, data) {
-  y.domain([0, d3.max(data, function(d) { return d.value; })]);
+  y.domain([0, .75]);
 
   var barWidth = nflBarWidth / data.length;
 
   var bar = chart.selectAll("g")
-      .data(data)
-    .enter().append("g")
-      .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
+	  .data(data)
+	.enter().append("g")
+	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
 
   bar.append("rect")
-      .attr("y", function(d) { return y(d.value); })
-      .attr("height", function(d) { return nlfBarHeight - y(d.value); })
-      .attr("width", barWidth - 1)
-      .attr("class", "bar") ;
+	  .attr("y", function(d) { return y(d.value); })
+	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
+	  .attr("width", barWidth - 1)
+	  .attr("class", "bar") ;
 
   bar.append("text")
-      .attr("x", barWidth / 2)
-      .attr("y", nlfBarHeight)
-      .attr("dy", "-.25em")
-      .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; });
-});
+	  .attr('class','barText')
+	  .attr("x", barWidth/2)
+	  .attr("y", function(d) { return y(d.value) + 3; })
+	  .attr("dy", "1em")
+	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
+	  .style('fill', 'white')
+	  .style('opacity', 0);
+
+
+
+	// Append axes
+	chart.append("g")
+	    .attr("class", "x axis")
+	    .attr("transform", "translate(0," + nflBarHeight + ")")
+	    .call(xAxis);
+
+	chart.append("g")
+	    .attr("class", "y axis")
+	    .call(yAxis);    
+
+    chart.append("text")
+	    .attr("x", (nflBarWidth / 2))             
+	    .attr("y", 0 + (margin.top))
+	    .attr("text-anchor", "middle")  
+	    .attr('class','barTitle')
+	    .text("NFL");
+
+
+
+// Turn the text white when you mouse over
+	bar.on("mouseover", function() {
+		d3.select(this)
+			.select("text")
+			.style("opacity", 1);
+	}).on("mouseout", function() {
+		d3.select(this)
+			.select("text")
+			.style("opacity", 0);
+		});
+
+	});
+
 
 function type(d) {
-  d.value = +d.value; // coerce to number
-  return d;
+	d.value = +d.value; // coerce to number
+	return d;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+// NBA Chart
+
+
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+ 
+ var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+
+var chartNba = d3.select(".nbaBar")
+    .attr("width", nflBarWidth + margin.left + margin.right)
+    .attr("height", nflBarHeight + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+d3.csv("nbaBar.csv", type, function(error, data) {
+  y.domain([0, .75]);
+
+  var barWidth = nflBarWidth / data.length;
+
+  var bar = chartNba.selectAll("g")
+	  .data(data)
+	.enter().append("g")
+	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
+
+  bar.append("rect")
+	  .attr("y", function(d) { return y(d.value); })
+	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
+	  .attr("width", barWidth - 1)
+	  .attr("class", "bar") ;
+
+  bar.append("text")
+	  .attr('class','barText')
+	  .attr("x", barWidth/2)
+	  .attr("y", function(d) { return y(d.value) + 3; })
+	  .attr("dy", "1em")
+	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
+	  .style('fill', 'white')
+	  .style('opacity', 0);
+
+
+
+	// Append axes
+	chartNba.append("g")
+	    .attr("class", "x axis")
+	    .attr("transform", "translate(0," + nflBarHeight + ")")
+	    .call(xAxis);
+
+	chartNba.append("g")
+	    .attr("class", "y axis")
+	    .call(yAxis);    
+
+    chartNba.append("text")
+	    .attr("x", (nflBarWidth / 2))             
+	    .attr("y", 0 + (margin.top))
+	    .attr("text-anchor", "middle")  
+	    .attr('class','barTitle')
+	    .text("NBA");
+
+// Turn the text white when you mouse over
+	bar.on("mouseover", function() {
+		d3.select(this)
+			.select("text")
+			.style("opacity", 1);
+	}).on("mouseout", function() {
+		d3.select(this)
+			.select("text")
+			.style("opacity", 0);
+		});
+
+	});
+
+
+function type(d) {
+	d.value = +d.value; // coerce to number
+	return d;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// MLB Chart
+
+var xMlb = d3.scale.ordinal()
+	.domain(["1st", "2nd", "3rd", "4th", "n/a", "n/a "])
+	.rangeRoundBands([0, nflBarWidth], .1);
+
+var xAxisMlb = d3.svg.axis()
+    .scale(xMlb)
+    .orient("bottom")
+ 
+ var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+
+var chartMlb = d3.select(".mlbFourBar")
+    .attr("width", nflBarWidth + margin.left + margin.right)
+    .attr("height", nflBarHeight + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+d3.csv("mlbFourBar.csv", type, function(error, data) {
+  y.domain([0, .75]);
+
+  var barWidth = nflBarWidth / data.length;
+
+  var bar = chartMlb.selectAll("g")
+	  .data(data)
+	.enter().append("g")
+	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
+
+  bar.append("rect")
+	  .attr("y", function(d) { return y(d.value); })
+	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
+	  .attr("width", barWidth - 1)
+	  .attr("class", "bar") ;
+
+  bar.append("text")
+	  .attr('class','barText')
+	  .attr("x", barWidth/2)
+	  .attr("y", function(d) { return y(d.value) + 3; })
+	  .attr("dy", "1em")
+	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
+	  .style('fill', 'white')
+	  .style('opacity', 0);
+
+
+
+	// Append axes
+	chartMlb.append("g")
+	    .attr("class", "x axis")
+	    .attr("transform", "translate(0," + nflBarHeight + ")")
+	    .call(xAxisMlb);
+
+	chartMlb.append("g")
+	    .attr("class", "y axis")
+	    .call(yAxis);    
+
+    chartMlb.append("text")
+	    .attr("x", (nflBarWidth / 2))             
+	    .attr("y", 0 + (margin.top))
+	    .attr("text-anchor", "middle")  
+	    .attr('class','barTitle')
+	    .text("MLB");	    
+
+// Turn the text white when you mouse over
+	bar.on("mouseover", function() {
+		d3.select(this)
+			.select("text")
+			.style("opacity", 1);
+	}).on("mouseout", function() {
+		d3.select(this)
+			.select("text")
+			.style("opacity", 0);
+		});
+
+	});
+
+
+function type(d) {
+	d.value = +d.value; // coerce to number
+	return d;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// NHL Chart
+
+
+
+var xAxis = d3.svg.axis()
+    .scale(x)
+    .orient("bottom")
+ 
+ var yAxis = d3.svg.axis()
+    .scale(y)
+    .orient("left")
+
+var chartNhl = d3.select(".nhlBar")
+    .attr("width", nflBarWidth + margin.left + margin.right)
+    .attr("height", nflBarHeight + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+d3.csv("nhlBar.csv", type, function(error, data) {
+  y.domain([0, .75]);
+
+  var barWidth = nflBarWidth / data.length;
+
+  var bar = chartNhl.selectAll("g")
+	  .data(data)
+	.enter().append("g")
+	  .attr("transform", function(d, i) { return "translate(" + i * barWidth + ",0)"; });
+
+  bar.append("rect")
+	  .attr("y", function(d) { return y(d.value); })
+	  .attr("height", function(d) { return nflBarHeight - y(d.value); })
+	  .attr("width", barWidth - 1)
+	  .attr("class", "bar") ;
+
+  bar.append("text")
+	  .attr('class','barText')
+	  .attr("x", barWidth/2)
+	  .attr("y", function(d) { return y(d.value) + 3; })
+	  .attr("dy", "1em")
+	  .text(function(d) { return Math.round((d.value).toFixed(2)*100) + '%'; })
+	  .style('fill', 'white')
+	  .style('opacity', 0);
+
+
+
+	// Append axes
+	chartNhl.append("g")
+	    .attr("class", "x axis")
+	    .attr("transform", "translate(0," + nflBarHeight + ")")
+	    .call(xAxis);
+
+	chartNhl.append("g")
+	    .attr("class", "y axis")
+	    .call(yAxis);    
+
+    chartNhl.append("text")
+	    .attr("x", (nflBarWidth / 2))             
+	    .attr("y", 0 + (margin.top))
+	    .attr("text-anchor", "middle")  
+	    .attr('class','barTitle')
+	    .text("NHL");	    
+
+// Turn the text white when you mouse over
+	bar.on("mouseover", function() {
+		d3.select(this)
+			.select("text")
+			.style("opacity", 1);
+	}).on("mouseout", function() {
+		d3.select(this)
+			.select("text")
+			.style("opacity", 0);
+		});
+
+	});
+
+
+function type(d) {
+	d.value = +d.value; // coerce to number
+	return d;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Grouped Bar Chart
+
+
+var margin = {top: 20, right: 20, bottom: 30, left: 40},
+    groupedBarWidth = 700 - margin.left - margin.right,
+    groupedBarHeight = 300 - margin.top - margin.bottom;
+
+var x0 = d3.scale.ordinal()
+    .rangeRoundBands([0, groupedBarWidth], .1);
+
+var x1 = d3.scale.ordinal();
+
+var yGrouped = d3.scale.linear()
+    .range([groupedBarHeight, 0]);
+
+var xAxisGrouped = d3.svg.axis()
+    .scale(x0)
+    .orient("bottom");
+
+var yAxisGrouped = d3.svg.axis()
+    .scale(yGrouped)
+    .orient("left")
+    .tickFormat(d3.format(".2%"));
+
+var svg = d3.select(".groupedBar").append("svg")
+    .attr("width", groupedBarWidth + margin.left + margin.right)
+    .attr("height", groupedBarHeight + margin.top + margin.bottom)
+  .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+d3.csv("allSportsBar.csv", function(error, data) {
+  if (error) throw error;
+
+  var ageNames = d3.keys(data[0]).filter(function(key) { return key !== "sport"; });
+
+  data.forEach(function(d) {
+    d.ages = ageNames.map(function(name) { return {name: name, value: +d[name]}; });
+  });
+
+  x0.domain(data.map(function(d) { return d.sport; }));
+  x1.domain(ageNames).rangeRoundBands([0, x0.rangeBand()]);
+  yGrouped.domain([0, d3.max(data, function(d) { return d3.max(d.ages, function(d) { return d.value; }); })]);
+
+  svg.append("g")
+      .attr("class", "x axis")
+      .attr("transform", "translate(0," + groupedBarHeight + ")")
+      .call(xAxisGrouped);
+
+  svg.append("g")
+      .attr("class", "y axis")
+      .call(yAxisGrouped)
+    .append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 6)
+      .attr("dy", ".71em")
+      .style("text-anchor", "end")
+      .text("Win-it-all percentage");
+
+  var sport = svg.selectAll(".sport")
+      .data(data)
+    .enter().append("g")
+      .attr("class", "sport")
+      .attr("transform", function(d) { return "translate(" + x0(d.sport) + ",0)"; });
+
+  sport.selectAll("rect")
+      .data(function(d) { return d.ages; })
+    .enter().append("rect")
+      .attr("width", x1.rangeBand())
+      .attr("x", function(d) { return x1(d.name); })
+      .attr("y", function(d) { return y(d.value); })
+      .attr("height", function(d) { return groupedBarHeight - y(d.value); })
+      .style("fill", function(d) { return color(d.name); });
+
+});
+
+
+
+
+
+
 
 </script>
 
 
 
 
-
+<div style = 'margin-bottom: 500px'>Come back in a week or so, when I finish all this up!</div>
 
 
 </html>
