@@ -26,9 +26,10 @@ body{
   padding-top: 20px;
 }
 
-.note i,a{
+i.note, .note {
     font-family: 'Merriweather', serif !important;
     font-size: 13px;
+    font-style: italic;
 }
 
 .graphNote i{
