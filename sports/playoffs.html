@@ -13,7 +13,7 @@
 <body>
 	<h1 class = 'title'>For which sports do playoff seedings matter most?</h1>
 	<p class = 'author'>Musings, by Pete Hlawitschka</p>
-	<p style = 'text-align: center; color: red'><b>[WORK IN PROGRESS...]</b></p>
+	<!-- <p style = 'text-align: center; color: red'><b>[WORK IN PROGRESS...]</b></p> -->
 	<p>This year, against all odds, the Cubs won the title, the Warriors blew a 3-1 lead in the finals, and the 15-1 Panthers lost in the Super Bowl. While everybody was going bananas about these upsets, nobody was talking about the fact that the winning teams were all 1-seeds, the top ranked team on their side of the bracket. (For those wondering, this year's Stanley Cup champion Penguins were a 2-seed.) Why was everybody so surprised? </p>
 
 	 <p>That got me thinking -- in some sports, it seems like the highest-ranked teams always make it to the championship. In others, it seems like anything could happen. So I was curious to see in which sports are playoff seedings most predictive of the eventual champion?</p>
@@ -48,6 +48,7 @@
 
 
     <div class = 'row' style = 'margin: 50px 20px 20px 20px'>
+        <div class = 'chartHeader'>Win Percentage Above Random</div>
         <svg class="nbaWpar"></svg>
         <svg class="nflWpar"></svg>
         <svg class="mlbWparFour"></svg>
@@ -56,7 +57,7 @@
 
     <p style = 'margin-top: 50px'>Calculating win percentage above a 50/50 match might not be the correct counterfactual, but it gets us closer. The top seeds that play the extra game win closer to 90% of the time (depending on the sport), so we're taking too much away from NFL and MLB teams that play one fewer game. Even so, NFL 1-seeds still do second best, after NBA 1-seeds, and MLB and NHL fall somewhere thereafter.</p>
 
-    <p>In the end, it looks like seeding in baseball matters the least. This is interesting because MLB seeding (not to be confused with <a href = http://cdn.fangraphs.com/not/wp-content/uploads/2012/09/BlurHurrHurr.gif>baseball seeding</a>), which is based on an 162-game season should be more accurate than NFL seeding, which is based on a 16-game season, but it's not.</p>
+    <p>In the end, it looks like seeding in baseball matters the least. This is interesting because MLB seeding (not to be confused with <a href = http://cdn.fangraphs.com/not/wp-content/uploads/2012/09/BlurHurrHurr.gif>baseball seeding</a>), which is based on an 162-game season should be more accurate than NFL seeding, which is based on a 16-game season. But it's not. And that's <a href = 'https://www.youtube.com/watch?v=b5-iJUuPWis'>why you play the game</a>.</p>
 
     <p class = 'note' style = 'margin-top: 20px'>* Okay, so actually 10 teams make it from the MLB, but that's a recent change. I use data from the 1994-2011 MLB seasons when 8 teams made the playoffs. More generally, the playoff systems for all of these sports are <a class = 'note' href = 'http://www.nhl.com/ice/page.htm?id=25433'>constantly changing</a>, which makes this sort of analysis and data scraping particularly tricky.</p>
 
@@ -479,8 +480,8 @@ function wparBarChart(chart, dataset, chartTitle, fifth = '5th', sixth = '6th'){
 </script>
 
 <script>
-    wparBarChart('nbaWpar','nbaWpar', 'NBA WPAR')
-    wparBarChart('nflWpar','nflWpar', 'NFL WPAR')
-    wparBarChart('mlbWparFour','mlbWparFour', 'MLB WPAR', fifth = 'n/a', sixth = ' n/a')
-    wparBarChart('nhlWpar','nhlWpar', 'NHL WPAR')
+    wparBarChart('nbaWpar','nbaWpar', 'NBA')
+    wparBarChart('nflWpar','nflWpar', 'NFL')
+    wparBarChart('mlbWparFour','mlbWparFour', 'MLB', fifth = 'n/a', sixth = ' n/a')
+    wparBarChart('nhlWpar','nhlWpar', 'NHL')
 </script>
