@@ -1,7 +1,9 @@
-"source","target","value"
-"NFL","1st seed",0.514285714285714
-"NFL","2nd seed",0.2
-"NFL","3rd seed",0.0571428571428571
-"NFL","4th seed",0.142857142857143
-"NFL","5th seed",0.0285714285714286
-"NFL","6th seed",0.0571428571428571
+source,target,value
+NFL,1st seed,0.514285714
+NFL,2nd seed,0.2
+NFL,3rd seed,0.057142857
+NFL,4th seed,0.142857143
+NFL,5th seed,0.028571429
+NFL,6th seed,0.057142857
+NFL,7th seed,0
+NFL,8th seed,0

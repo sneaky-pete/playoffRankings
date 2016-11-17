@@ -629,3 +629,27 @@ write.csv(nflWinners, '../git/playoffRankings/sports/nflBar.csv', row.names = F)
 write.csv(nbaWinners, '../git/playoffRankings/sports/nbaBar.csv', row.names = F)
 write.csv(mlbWinnersFour, '../git/playoffRankings/sports/mlbFourBar.csv', row.names = F)
 write.csv(nhlWinners, '../git/playoffRankings/sports/nhlBar.csv', row.names = F)
+
+
+
+# Create chart for win percentage above random (WPAR)
+nbaWpar <- nbaWinners %>%
+                mutate(value = value - .0625)
+
+nflWpar <- nflWinners %>%
+    mutate(value = ifelse(target == "1st seed" | target == "2nd seed", value - 0.125, value - 0.0625))
+
+mlbWparFour <- mlbWinnersFour %>%
+    mutate(value = value - .125) %>%
+    mutate(value = ifelse(target == "5th seed" | target == "6th seed", 0, value))
+
+nhlWpar <- nhlWinners %>%
+    mutate(value = value - .0625)
+
+write.csv(nbaWpar, '../git/playoffRankings/sports/nbaWpar.csv', row.names = F)
+write.csv(nflWpar, '../git/playoffRankings/sports/nflWpar.csv', row.names = F)
+write.csv(mlbWparFour, '../git/playoffRankings/sports/mlbWparFour.csv', row.names = F)
+write.csv(nhlWpar, '../git/playoffRankings/sports/nhlWpar.csv', row.names = F)
+
+
+
